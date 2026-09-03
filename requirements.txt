@@ -1,0 +1,19 @@
+# Pinned to what was actually tested during the build (CPU-only, Windows).
+# Core pipeline
+torch==2.14.0
+torchcodec==0.16.0          # audio decoding; requires FFmpeg "shared" build system-wide (not pip-installable)
+transformers==5.16.1
+datasets==5.0.1
+huggingface_hub==1.29.0
+numpy==2.5.2
+scikit-learn==1.9.0
+matplotlib==3.11.1
+
+# Demo
+gradio==6.26.0
+g2p-en==2.1.0                # G2P for arbitrary demo sentences (ARPAbet output, same as speechocean762)
+
+# Dev-only: used once to empirically build src/phone_mapping.py against the
+# real espeak-ng backend (see src/phone_mapping.py docstring). Not imported
+# by the scoring pipeline itself; keep pinned for reproducing that step.
+phonemizer==3.4.0
