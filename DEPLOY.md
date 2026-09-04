@@ -115,3 +115,30 @@ down which layer is taking the space -- the CPU-only torch wheel and the
 baked-in acoustic model weights are the two largest contributors by
 design; everything in `.dockerignore` (datasets/, cached posteriors,
 features.parquet) is what was cut to keep it there.
+
+## Verified: memory under the 4 GB cap
+
+Image size is disk footprint, not runtime memory -- the two aren't the
+same number, so this was checked separately. Ran the built image capped
+to the actual App Runner target (`docker run --memory=4g
+--memory-swap=4g --cpus=1 ...`, swap disabled so a real overrun shows up
+as an OOM kill rather than silently spilling to disk) and drove it with
+`gradio_client` against all three `examples/` clips rather than just
+polling `/`, to catch any inference-time spike:
+
+- After model load, idle: **513 MB** (12.5% of the cap)
+- Peak during inference (three back-to-back requests): **714 MB** (17.4%)
+- Settled after requests: **670 MB** (16.4%)
+- `docker inspect` confirmed `OOMKilled=false` throughout; no errors in
+  `docker logs`.
+
+CPU pegged at ~97-110% of the single allocated vCPU while scoring --
+expected, since inference here is unbatched and single-threaded per
+request (REPORT.md Section 3.3) and fully saturates the one vCPU it's
+given rather than contending for it.
+
+Headroom is large: even at peak, memory usage is under a fifth of the 4
+GB budget, so a single request has no realistic path to an OOM kill on
+this instance size. This wasn't load-tested for concurrent requests --
+see the Auto scaling note in Section 3 (max size = 1) for why that's a
+deliberate non-goal here, not an oversight.
