@@ -3,8 +3,16 @@
 A phoneme-level mispronunciation scoring pipeline: audio + target sentence
 in, a 0-2 score per phoneme + below-threshold flags + an articulatory
 coaching tip for the worst phone out. No fine-tuned models, no LLM anywhere
-in the pipeline -- see `REPORT.md` for the full evaluation and the
+in the pipeline, see `REPORT.md` for the full evaluation and the
 reasoning behind that constraint.
+
+
+
+https://github.com/user-attachments/assets/bde420f7-0a17-4dc9-acc5-4711c8137fe6
+
+
+
+
 
 ## Headline numbers
 
