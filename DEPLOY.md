@@ -10,10 +10,10 @@ image; everything below is console clicks.
 
 1. AWS Console -> **ECR** -> **Repositories** -> **Create repository**.
 2. Visibility: **Private**.
-3. Repository name: `pronunciation-scorer` (or whatever you set
+3. Repository name: `pronunciation-scoring` (or whatever you set
    `ECR_REPO_NAME` to in `scripts/build_and_push.sh`).
 4. Leave scan-on-push and encryption at their defaults. Create.
-5. Note the repository URI shown (`<account-id>.dkr.ecr.ap-south-1.amazonaws.com/pronunciation-scorer`).
+5. Note the repository URI shown (`<account-id>.dkr.ecr.ap-south-1.amazonaws.com/pronunciation-scoring`).
 
 ## 2. Build and push the image
 
