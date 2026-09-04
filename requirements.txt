@@ -1,19 +1,30 @@
 # Pinned to what was actually tested during the build (CPU-only, Windows).
 # Core pipeline
 torch==2.14.0
-torchcodec==0.16.0          # audio decoding; requires FFmpeg "shared" build system-wide (not pip-installable)
+torchcodec==0.16.0          # audio decoding for src/data.py's dataset loading only (datasets' Audio
+                             # feature); app.py never imports src.data, so the demo itself doesn't need
+                             # this or a system FFmpeg install -- see Dockerfile, which drops both.
 transformers==5.16.1
 datasets==5.0.1
 huggingface_hub==1.29.0
 numpy==2.5.2
+pandas==3.0.5                # app.py builds its per-phone feature DataFrame directly (score_utterance);
+                              # previously only pulled in transitively via `datasets`, pinned explicitly here
 scikit-learn==1.9.0
 matplotlib==3.11.1
 
 # Demo
 gradio==6.26.0
 g2p-en==2.1.0                # G2P for arbitrary demo sentences (ARPAbet output, same as speechocean762)
+soundfile==0.13.1            # app.py's own audio decoding (see app.py:_load_audio) -- needs libsndfile
+                              # system-wide (pip wheel bundles it on most platforms; the container installs
+                              # libsndfile1 via apt explicitly, see Dockerfile)
 
-# Dev-only: used once to empirically build src/phone_mapping.py against the
-# real espeak-ng backend (see src/phone_mapping.py docstring). Not imported
-# by the scoring pipeline itself; keep pinned for reproducing that step.
+# NOT dev-only, despite earlier comment here: transformers' Wav2Vec2PhonemeCTCTokenizer
+# unconditionally calls init_backend() -> a real espeak-ng phonemizer backend in its
+# __init__ (do_phonemize=True by default), even though this pipeline never calls it to
+# phonemize text -- so AutoProcessor.from_pretrained() in src/acoustic.py needs both this
+# package AND the espeak-ng system library at runtime, not just for rebuilding
+# src/phone_mapping.py. Verified by reading transformers 5.16.1's tokenizer source
+# directly (Task 4). The Dockerfile installs espeak-ng via apt accordingly.
 phonemizer==3.4.0

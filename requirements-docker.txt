@@ -1,0 +1,26 @@
+# Runtime dependencies for the App Runner container ONLY -- a trimmed
+# subset of requirements.txt. Torch is installed separately in the
+# Dockerfile from the CPU-only wheel index (see Dockerfile comments).
+# Deliberately excluded vs. requirements.txt, and why:
+#   torchcodec, datasets  - only used by src/data.py (dataset loading for
+#                            training/eval), which app.py never imports.
+#   matplotlib             - only used by src/train_head.py to save
+#                            figures/, not by the demo.
+transformers==5.16.1
+huggingface_hub==1.29.0
+numpy==2.5.2
+pandas==3.0.5
+scikit-learn==1.9.0
+
+# Demo
+gradio==6.26.0
+g2p-en==2.1.0
+soundfile==0.13.1
+
+# NOT optional -- transformers' Wav2Vec2PhonemeCTCTokenizer eagerly
+# initializes a real espeak-ng phonemizer backend on load (do_phonemize=True
+# by default), even though this pipeline never calls it to phonemize text.
+# Without this package AND the espeak-ng system library (installed via apt
+# in the Dockerfile), AutoProcessor.from_pretrained() crashes on startup.
+# See requirements.txt for how this was verified.
+phonemizer==3.4.0

@@ -1,0 +1,22 @@
+# Not used by app.py at runtime -- only src/data.py's dataset loading and
+# src/train_head.py's figure generation use these (local dev/repro path,
+# see README.md). Keeping them out of the build context is most of the
+# image-size win here, not just the torch/torchcodec swap in the Dockerfile.
+datasets/
+cache/posteriors/
+cache/features.parquet
+figures/
+README.md
+
+# VCS / IDE / Python cruft
+.git/
+.gitignore
+.idea/
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Local scratch
+*.log

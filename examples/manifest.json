@@ -1,0 +1,20 @@
+[
+  {
+    "id": "test_1231",
+    "wav": "clean_more.wav",
+    "sentence": "WE NEED MORE AND MORE AND MORE",
+    "note": "clean: all-2.0 human scores, model agrees, no flags"
+  },
+  {
+    "id": "test_2256",
+    "wav": "substitution_there.wav",
+    "sentence": "THERE WAS NOTHING LEFT FOR ME.",
+    "note": "obvious substitution: DH in THERE scored 0.0 by humans, model confidently catches it (pred 0.34)"
+  },
+  {
+    "id": "test_1036",
+    "wav": "borderline_canberra.wav",
+    "sentence": "ANDY LOVES CANBERRA",
+    "note": "borderline/model-wrong: V in LOVES is human-perfect (2.0) but the model confidently misflags it (pred 0.24) -- a real false positive"
+  }
+]
