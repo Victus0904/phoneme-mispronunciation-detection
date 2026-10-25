@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect</title>
+<style>
+:root { --bg: #f7f7f5; --surface: #fff; --text: #16161a; --muted: #6b6b73; --border: #dcdcd5; --accent: #4f46e5; --warm: #b45309; --warm-soft: #fdf4e7; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0d0e12; --surface: #15161c; --text: #ececf1; --muted: #9093a0; --border: #333645; --accent: #8b8cf8; --warm: #f0b25a; --warm-soft: #2a2117; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 460px; margin: 0 auto; padding: 48px 20px; }
+.mark { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: grid; place-items: center; box-shadow: 0 8px 24px rgba(79,70,229,.35); }
+h1 { font-size: 26px; letter-spacing: -.02em; margin: 22px 0 6px; }
+p { color: var(--muted); margin: 0 0 22px; }
+label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 6px; }
+input { width: 100%; height: 52px; padding: 0 14px; border-radius: 13px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: 16px system-ui, sans-serif; }
+input:focus { outline: 2px solid var(--accent); }
+button { width: 100%; height: 52px; margin-top: 14px; border: 0; border-radius: 13px; background: var(--accent); color: #fff; font: 600 16px system-ui, sans-serif; }
+.err { display: none; margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: var(--warm-soft); border: 1px solid var(--warm); font-size: 14px; }
+ol { color: var(--muted); font-size: 14px; padding-left: 20px; margin: 28px 0 0; }
+li { margin-bottom: 8px; }
+code { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mark"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M3 12h1.5M7 8v8M11 4.5v15M15 8.5v7M19 11v2"/></svg></div>
+  <h1>Connect to your coach</h1>
+  <p>The coach runs on your computer. Paste the link it shows you when you start sharing it.</p>
+  <label for="url">Coach link</label>
+  <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://something.trycloudflare.com">
+  <button id="go">Connect</button>
+  <div class="err" id="err"></div>
+  <ol>
+    <li>On your computer, double-click <code>run_public.bat</code> in the project folder.</li>
+    <li>Copy the <code>https://….trycloudflare.com</code> link it prints.</li>
+    <li>Paste it here. The link changes each time you restart sharing; if it stops working, you'll come back to this screen.</li>
+  </ol>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const m = /#error=(.*)$/.exec(location.hash);
+if (m) { $("err").textContent = decodeURIComponent(m[1]); $("err").style.display = "block"; }
+try { $("url").value = (window.CoachApp && CoachApp.getServer()) || ""; } catch (e) {}
+function go() {
+  let v = $("url").value.trim();
+  if (v && !/^https?:\/\//i.test(v)) v = "https://" + v;
+  if (!/^https:\/\//i.test(v)) { $("err").textContent = "The link must start with https://"; $("err").style.display = "block"; return; }
+  if (!window.CoachApp || !CoachApp.setServer(v)) { $("err").textContent = "That doesn't look like a valid link."; $("err").style.display = "block"; }
+}
+$("go").onclick = go;
+$("url").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+</script>
+</body>
+</html>

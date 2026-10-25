@@ -7,3 +7,12 @@ cache/
 # IDE
 .idea/
 *.iml
+
+# API keys (never commit)
+.env
+
+# Android build output and signing keys
+android/build/
+*.jks
+*.keystore
+*.password

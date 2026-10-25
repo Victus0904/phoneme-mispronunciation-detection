@@ -1,0 +1,15 @@
+# Space runtime only (torch is installed from the CPU wheel index in the Dockerfile).
+# Pinned to the versions the shipped head (models/head_v2.joblib) was trained with.
+transformers==5.16.1
+huggingface_hub==1.29.0
+numpy==2.5.2
+pandas==3.0.5
+scikit-learn==1.9.0
+scipy==1.18.1
+fastapi==0.141.1
+uvicorn==0.52.4
+python-multipart==0.0.32
+soundfile==0.13.1
+g2p-en==2.1.0
+phonemizer==3.4.0
+httpx==0.28.1                # voice coach: calls to the free LLM / speech APIs (src/teacher.py)
