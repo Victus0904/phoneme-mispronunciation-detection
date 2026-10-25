@@ -1,0 +1,62 @@
+{
+ "levels": {
+  "relaxed": {
+   "threshold": 1.544433533507621,
+   "rule": "train OOF precision >= 0.8",
+   "train_oof": {
+    "precision": 0.8,
+    "recall": 0.3197779912477319,
+    "flag_rate": 0.07955221344209364
+   },
+   "test": {
+    "precision": 0.7886631716906947,
+    "recall": 0.27124183006535946,
+    "flag_rate": 0.06443032362937787
+   }
+  },
+  "standard": {
+   "threshold": 1.749977048703995,
+   "rule": "train OOF precision >= 0.7",
+   "train_oof": {
+    "precision": 0.7,
+    "recall": 0.44006831038531324,
+    "flag_rate": 0.12511683235618998
+   },
+   "test": {
+    "precision": 0.6878601613522858,
+    "recall": 0.40353842686499886,
+    "flag_rate": 0.10990310118431885
+   }
+  },
+  "strict": {
+   "threshold": 1.9024467160253837,
+   "rule": "train OOF recall >= 0.7",
+   "train_oof": {
+    "precision": 0.5539228105734313,
+    "recall": 0.7000747144839364,
+    "flag_rate": 0.25152944175375985
+   },
+   "test": {
+    "precision": 0.5325464634898265,
+    "recall": 0.6813162046427766,
+    "flag_rate": 0.23967151512592624
+   }
+  },
+  "very_strict": {
+   "threshold": 1.9529530056952233,
+   "rule": "train OOF recall >= 0.85",
+   "train_oof": {
+    "precision": 0.43657493695866684,
+    "recall": 0.8500373572419682,
+    "flag_rate": 0.387501062112329
+   },
+   "test": {
+    "precision": 0.4171188811188811,
+    "recall": 0.8402073473067387,
+    "flag_rate": 0.3773564989761236
+   }
+  }
+ },
+ "default": "standard",
+ "error_base_rate_test": 0.1873377103168739
+}

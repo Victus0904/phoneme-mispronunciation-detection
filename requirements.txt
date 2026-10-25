@@ -34,3 +34,4 @@ soundfile==0.13.1            # app.py's own audio decoding (see app.py:_load_aud
 # src/phone_mapping.py. Verified by reading transformers 5.16.1's tokenizer source
 # directly (Task 4). The Dockerfile installs espeak-ng via apt accordingly.
 phonemizer==3.4.0
+httpx==0.28.1                # voice coach: calls to the free LLM / speech APIs (src/teacher.py)

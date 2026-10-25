@@ -1,6 +1,6 @@
 # Pronunciation Coach
 
-**Phoneme-level pronunciation feedback that runs entirely on your own computer.**
+**Phoneme-level pronunciation feedback that runs on your own computer.**
 Read a sentence aloud and get a score for every sound you made, the sounds
 worth another take, what the model heard instead, and a tip for fixing each
 one.
@@ -10,10 +10,10 @@ one.
 - **Frozen acoustic model, no fine-tuning.** It uses
   `facebook/wav2vec2-lv-60-espeak-cv-ft` as-is. Only a small scoring head
   is trained.
-- **No LLM anywhere.** Scores come from the acoustic model's own
+- **No LLM in the scoring.** Scores come from the acoustic model's own
   phone-level evidence. Coaching tips are a hand-written table, because a
   wrong generated articulation instruction is worse than a correct generic
-  one.
+  one. The optional voice coach only rephrases those scores and tips.
 - **Honest evaluation.** Train and test use different speakers, every
   choice was made on the train split, and the test split was scored once.
   See [`REPORT_v2.md`](REPORT_v2.md).
@@ -64,8 +64,49 @@ Then:
 3. Click any sound for details and a tip, or click a word to hear just that
    word from your recording.
 
-Audio never leaves your machine. Your recent attempts are saved in your
-browser only.
+Scoring runs on your machine and recordings are never stored. Your recent
+attempts are saved in your browser only. If you add LLM keys, the coach
+sends your sentence and scores (never your recording) to that service, and
+questions you *speak* to Maya are transcribed by Groq.
+
+What else is in the app:
+
+- **Maya, your voice coach.** She reads your feedback aloud, and you can ask
+  her questions out loud ("how do I say th?"). Her words come from a free LLM
+  that only rephrases the measured scores and the hand-written tips. Add free
+  Groq, Gemini or Mistral keys to `.env` (see `.env.example`); without keys a
+  built-in template is used.
+- **Fluency and rhythm scores** (0–10), trained on expert ratings: test
+  r = 0.82 and 0.81.
+- **Minimal-pair drills** (ship / sheep, think / sink, …) in the Pairs tab.
+- **Scoring strictness** (Relaxed / Standard / Strict / Very strict, in
+  Settings). The default flags only sounds it's fairly sure about; stricter
+  levels catch more real errors at the cost of more false alarms (table
+  below).
+- **Lessons, progress tracking** (streaks, per-sound trend lines), A/B
+  playback, and settings for voice, speed and feedback style.
+- **Installable** as a web app, or as an Android app: download the APK from
+  [Releases](https://github.com/Victus0904/phoneme-mispronunciation-detection/releases/latest)
+  (details and how to check it in [`android/README.md`](android/README.md)).
+  Works on phones too: the layout switches to a bottom tab bar.
+
+### Strictness levels
+
+Thresholds were chosen on training-split predictions only, then checked once
+on test speakers. 18.7% of test sounds are rated below 2 by the experts.
+
+| Level | Real errors caught (recall) | Flags that are real errors (precision) | Sounds flagged |
+|---|---|---|---|
+| Relaxed | 27% | 79% | 6% |
+| Standard (default) | 40% | 69% | 11% |
+| Strict | 68% | 53% | 24% |
+| Very strict | 84% | 42% | 38% |
+
+The overall score is the share of sounds on target at your level, so it
+drops as you make the coach stricter.
+
+To share it publicly from your computer for free, run `run_public.bat`. It
+prints a temporary `https://….trycloudflare.com` link.
 
 ## How it works
 
@@ -98,17 +139,25 @@ The full story, ablations and per-phone results are in
 
 - **Trained and evaluated only on Mandarin-L1 English learners**, mostly
   children. Accuracy for other accents hasn't been measured.
-- Scores are a practice signal, not a verdict. About 3 in 10 flags are
-  false alarms. V, UW, L, TH and DH are the hardest sounds for the model.
+- Scores are a practice signal, not a verdict. At the default level about
+  3 in 10 flags are false alarms (more at stricter levels). V, UW, L, TH and
+  DH are the hardest sounds for the model.
+- Minimal-pair accuracy (82% right, 5% wrong, the rest "not sure") was
+  measured on synthetic Windows voices, not real learners.
 - The sentence-to-phones step (`g2p_en`) hasn't been evaluated. Avoid
   numerals and unusual words.
 
 ## Repository layout
 
 ```
-server.py, web/index.html   local app (FastAPI backend + single-file front end)
-run_app.bat, run_app.sh     launchers
+server.py, web/index.html   local app (FastAPI backend + single-file front end, PWA)
+run_app.bat, run_app.sh     launchers; run_public.bat shares it via a Cloudflare tunnel
 models/head_v2.joblib       trained v2 scoring head
+models/utt_v2.joblib        fluency + rhythm heads
+models/strictness.json      strictness thresholds and their test numbers
+models/pairs_calibration.json  minimal-pair calibration
+android/           Android app (WebView shell) and its build script
+tests/             end-to-end tests (python -m unittest discover tests)
 src/
   acoustic.py      frozen model, posteriors, silence trimming
   align.py         CTC forced alignment
@@ -118,6 +167,9 @@ src/
   scorer.py        inference with word/phone timestamps
   text.py          sentence -> phones (g2p_en)
   tips.py          hand-written coaching tips for every phone
+  utterance_v2.py  fluency / rhythm features and heads
+  pairs.py         minimal-pair sets
+  teacher.py       the voice coach (free LLM / TTS / Whisper chain, template fallback)
   features.py, train_head.py, data.py   v1 pipeline and dataset loading
 scripts/           v2 extraction, feature building, CV, final training
 app.py             original v1 Gradio demo
@@ -139,7 +191,14 @@ python scripts/extract_full.py        # frozen-model pass over all 5,000 utteran
 python scripts/build_features_v2.py   # feature table (~6 min)
 python scripts/cv_v2.py gbm_vec_h16 seq_vec_h16_s0 seq_vec_h16_s1   # train-split CV
 python scripts/train_v2.py            # final fit, one-time test evaluation, models/ + figures/
+python scripts/calibrate_strictness.py   # strictness thresholds (train OOF) + their test numbers
+python scripts/build_utt_features.py && python scripts/train_fluency.py   # fluency + rhythm heads
 ```
+
+To check the app still works after a change, run
+`python -m unittest discover tests` (about a minute on CPU). It scores the
+example clips at every strictness level and checks input validation and the
+static files, without calling any LLM service.
 
 Everything is seeded. The v1 pipeline is still runnable; see
 [`REPORT.md`](REPORT.md) and `python src/train_head.py`.
@@ -147,7 +206,8 @@ Everything is seeded. The v1 pipeline is still runnable; see
 ## Anti-goals
 
 No accent classifier, no accent conversion, no
-Whisper-transcript-as-pronunciation-score, no chatbot, no speaker
-adaptation, no prosody scoring. ASR is built to recover the intended words
+Whisper-transcript-as-pronunciation-score, no LLM-generated scores, no
+speaker adaptation. (Whisper only transcribes the questions you ask Maya;
+it never judges your pronunciation.) ASR is built to recover the intended words
 *despite* mispronunciation, which is exactly the signal a pronunciation
 scorer needs (see [`REPORT.md`](REPORT.md) Section 1).

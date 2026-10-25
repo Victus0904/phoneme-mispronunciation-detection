@@ -186,3 +186,80 @@ python scripts/build_features_v2.py     # ~6 min: cache/v2/features.parquet + pe
 python scripts/cv_v2.py gbm_vec_h16 seq_vec_h16_s0 seq_vec_h16_s1   # train-split CV, writes OOF preds
 python scripts/train_v2.py              # final fit, one-time test eval, models/head_v2.joblib, figures
 ```
+
+## 7. Fluency and rhythm scores (v2.1)
+
+speechocean762 also has expert **utterance-level** ratings (0–10) for
+`fluency` and `prosodic` (rhythm and intonation). Two more heads are trained
+on them, with the same rules as the phone scorer: frozen model, speaker-
+grouped CV on train only, one-time test evaluation.
+
+The features (`src/utterance_v2.py`) come from the same single model pass:
+- **timing:** speech rate, pauses between words (count, length, share of
+  time), word-duration regularity, and leading/trailing silence;
+- **hesitation:** extra CTC spikes beyond the expected phones;
+- **accuracy:** GOP statistics;
+- **pitch:** a simple F0 track (range, variability, slope) and energy
+  variability;
+- **embeddings:** mean/std of the frozen hidden states over speech.
+
+The head is a GBM plus a ridge on scalars and PCA'd embeddings
+(`scripts/train_fluency.py`).
+
+| Test split (2,500 utts, speaker-disjoint) | Pearson r | Spearman ρ | MAE (0–10) |
+|---|---|---|---|
+| Fluency | **0.820** | 0.806 | 0.59 |
+| Prosody (rhythm & intonation) | **0.808** | 0.792 | 0.61 |
+| Fluency, timing/pitch scalars only | 0.794 | | |
+| Prosody, timing/pitch scalars only | 0.779 | | |
+
+Train-split CV picked "scalars + embeddings" (fluency 0.860 and prosody
+0.856 in CV). The raw measurements behind the scores (words per minute,
+long pauses, pitch range) are shown in the app as-is.
+
+## 8. Minimal-pair drills
+
+The app asks for one word of a pair (ship/sheep, think/sink…; 14 contrasts,
+72 pairs in `src/pairs.py`). It then compares the full CTC sequence
+likelihood of the two words' expected phone sequences (the GOP-SF
+machinery, so no alignment is needed), minus a per-contrast offset, with an
+"unsure" band of ±1.0 log-likelihood.
+
+There is **no labelled learner data** for this task. The check
+(`scripts/check_pairs.py`) used the three Windows text-to-speech voices
+saying both words of every pair (432 recordings):
+
+| | correct | unsure | wrong |
+|---|---|---|---|
+| raw comparison | 76.2% | 11.6% | 12.3% |
+| + per-contrast offset, **leave-one-voice-out** | **81.5%** | 13.7% | **4.9%** |
+
+Offsets were fitted on two voices and tested on the third. The offsets the
+app ships (`models/pairs_calibration.json`) are fitted on all three. This
+verifies the mechanism on clean synthetic speech only. Accuracy on
+learners' voices is unmeasured, and the app says so next to the drill.
+
+## 9. The coach ("Maya") and the apps
+
+- **Spoken feedback and "Talk to Maya"** (`src/teacher.py`): an LLM (Groq →
+  Gemini → Mistral free tiers, or a template when none answers) phrases the
+  scorer's measured facts and the hand-written tips. The prompt forbids
+  articulation advice that isn't in `src/tips.py`. Spoken questions are
+  transcribed with Groq's free Whisper. The LLM never scores anything and
+  never receives the recording.
+- **Installable web app** (PWA: `web/manifest.webmanifest`, `web/sw.js`).
+- **Android app** (`android/`): a WebView shell around your own server. See
+  `android/README.md`.
+
+## 10. Scoring strictness
+
+The shipped flag threshold (train-OOF precision >= 0.70) catches only ~40% of the sounds experts marked wrong, which feels lenient. `scripts/calibrate_strictness.py` picks three more thresholds on train OOF predictions only, then checks each once on the speaker-disjoint test split (`models/strictness.json`):
+
+| level | rule (train OOF) | test precision | test recall | sounds flagged |
+|---|---|---|---|---|
+| relaxed | precision >= 0.80 | 0.79 | 0.27 | 6.4% |
+| standard | precision >= 0.70 | 0.69 | 0.40 | 11.0% |
+| strict | recall >= 0.70 | 0.53 | 0.68 | 24.0% |
+| very strict | recall >= 0.85 | 0.42 | 0.84 | 37.7% |
+
+18.7% of test phones are rated below 2 by the experts. The app's overall score is now the share of sounds on target at the chosen level, so stricter levels give lower, more demanding scores. The trade-off is more false alarms: at "strict" about half the flags are sounds the experts accepted.
