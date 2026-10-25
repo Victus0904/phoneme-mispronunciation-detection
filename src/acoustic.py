@@ -77,9 +77,18 @@ def trim_silence(waveform: np.ndarray, sr: int, frame_ms: float = 20.0,
     utterance's peak energy), not a model -- keeps the alignment step itself
     simple, per the "avoid alignment tooling" instruction.
     """
+    start, end = trim_bounds(waveform, sr, frame_ms, rel_threshold, pad_ms)
+    return waveform[start:end]
+
+
+def trim_bounds(waveform: np.ndarray, sr: int, frame_ms: float = 20.0,
+                rel_threshold: float = 0.03, pad_ms: float = 80.0):
+    """(start, end) sample indices that trim_silence() keeps -- the local
+    app needs the offset to map aligned phone times back onto the user's
+    original recording."""
     frame_len = int(sr * frame_ms / 1000)
     if frame_len < 1 or len(waveform) < frame_len:
-        return waveform
+        return 0, len(waveform)
 
     n_frames = len(waveform) // frame_len
     trimmed = waveform[: n_frames * frame_len].reshape(n_frames, frame_len)
@@ -88,12 +97,12 @@ def trim_silence(waveform: np.ndarray, sr: int, frame_ms: float = 20.0,
 
     voiced = np.where(energy > threshold)[0]
     if len(voiced) == 0:
-        return waveform  # all "silence" by this measure -- don't trim, let it fail loudly downstream
+        return 0, len(waveform)  # all "silence" by this measure -- don't trim, let it fail loudly downstream
 
     pad_frames = int(pad_ms / frame_ms)
     start = max(0, voiced[0] - pad_frames) * frame_len
     end = min(n_frames, voiced[-1] + 1 + pad_frames) * frame_len
-    return waveform[start:end]
+    return start, end
 
 
 SPECIAL_SYMBOLS = {"<pad>", "<s>", "</s>", "<unk>"}

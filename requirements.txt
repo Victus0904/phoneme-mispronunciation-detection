@@ -13,7 +13,13 @@ pandas==3.0.5                # app.py builds its per-phone feature DataFrame dir
 scikit-learn==1.9.0
 matplotlib==3.11.1
 
-# Demo
+# Local app (server.py + web/index.html)
+fastapi==0.141.1
+uvicorn==0.52.4
+python-multipart==0.0.32     # FastAPI form/file uploads
+scipy==1.18.1                # resample_poly for non-16kHz uploads; also used by train_head.py metrics
+
+# Gradio demo (app.py, the original v1 demo)
 gradio==6.26.0
 g2p-en==2.1.0                # G2P for arbitrary demo sentences (ARPAbet output, same as speechocean762)
 soundfile==0.13.1            # app.py's own audio decoding (see app.py:_load_audio) -- needs libsndfile

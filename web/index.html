@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pronunciation Coach</title>
+<style>
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --surface-2: #f0f2f5; --border: #e2e5ea;
+  --text: #1b1f24; --muted: #646b75; --faint: #9aa1ab;
+  --accent: #2f6fd0; --accent-ink: #ffffff; --accent-soft: #e7effb;
+  --warn: #c7741f; --warn-soft: #fbf0e3; --rec: #d23c3c;
+  --ramp-h: 212; --ramp-s: 64%;
+  --shadow: 0 1px 2px rgba(16,24,40,.05), 0 2px 8px rgba(16,24,40,.06);
+  --radius: 14px;
+  --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1216; --surface: #171b21; --surface-2: #1e232b; --border: #2a313b;
+    --text: #e8ebef; --muted: #9aa3ae; --faint: #6b7380;
+    --accent: #6ea4f2; --accent-ink: #0b1220; --accent-soft: #1b2a40;
+    --warn: #e6a25a; --warn-soft: #33261a; --rec: #ef6363;
+    --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #171b21; --surface-2: #1e232b; --border: #2a313b;
+  --text: #e8ebef; --muted: #9aa3ae; --faint: #6b7380;
+  --accent: #6ea4f2; --accent-ink: #0b1220; --accent-soft: #1b2a40;
+  --warn: #e6a25a; --warn-soft: #33261a; --rec: #ef6363;
+  --shadow: 0 1px 2px rgba(0,0,0,.4);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+button { font: inherit; color: inherit; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 48px; }
+header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+header h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
+header .sub { color: var(--muted); font-size: 13px; }
+header .spacer { flex: 1; }
+.chip-badge { font-size: 12px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; background: var(--surface); }
+.icon-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; width: 36px; height: 36px; cursor: pointer; display: grid; place-items: center; }
+.icon-btn:hover { background: var(--surface-2); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 16px; }
+.card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+
+.sentence-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.sentence-row input {
+  flex: 1 1 320px; min-width: 0; font-size: 18px; padding: 12px 14px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+}
+.sentence-row input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn { border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.btn:hover { background: var(--surface-2); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.06); }
+.suggest { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.suggest button { border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; }
+.suggest button:hover { color: var(--text); border-color: var(--faint); }
+.suggest .label { font-size: 12px; color: var(--faint); align-self: center; margin-right: 2px; }
+
+.rec-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+.rec-btn {
+  width: 64px; height: 64px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--rec); color: #fff; display: grid; place-items: center; flex: none;
+  box-shadow: 0 2px 10px rgba(210,60,60,.35); transition: transform .12s;
+}
+.rec-btn:hover { transform: scale(1.04); }
+.rec-btn .sq { width: 20px; height: 20px; border-radius: 4px; background: #fff; display: none; }
+.rec-btn .dot { width: 22px; height: 22px; border-radius: 50%; background: #fff; }
+.rec-btn.recording .sq { display: block; } .rec-btn.recording .dot { display: none; }
+.rec-btn.recording { animation: pulse 1.4s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(210,60,60,.45); } 50% { box-shadow: 0 0 0 10px rgba(210,60,60,0); } }
+.rec-meta { flex: 1; min-width: 200px; }
+.rec-status { font-size: 14px; color: var(--muted); }
+.meter { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+.meter > div { height: 100%; width: 0; background: var(--accent); transition: width .06s linear; }
+.wave { width: 100%; height: 96px; display: block; margin-top: 14px; border-radius: 10px; background: var(--surface-2); cursor: pointer; }
+.hint { font-size: 12px; color: var(--faint); margin-top: 6px; }
+
+.results-top { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.ring { position: relative; width: 112px; height: 112px; flex: none; }
+.ring svg { transform: rotate(-90deg); }
+.ring .val { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.ring .val b { font-size: 30px; line-height: 1; display: block; }
+.ring .val span { font-size: 11px; color: var(--muted); }
+.summary { flex: 1; min-width: 240px; }
+.summary .big { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+.summary .small { color: var(--muted); font-size: 13px; }
+
+.words { display: flex; flex-wrap: wrap; gap: 14px 12px; margin-top: 18px; }
+.word { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.word .phones { display: flex; gap: 3px; }
+.ph {
+  min-width: 40px; padding: 6px 7px 5px; border-radius: 8px; border: 2px solid transparent;
+  display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform .1s;
+}
+.ph:hover { transform: translateY(-2px); }
+.ph.sel { border-color: var(--text); }
+.ph.worst { outline: 2px dashed var(--warn); outline-offset: 2px; }
+.ph .sym { font-size: 18px; font-weight: 600; line-height: 1.1; font-family: "Segoe UI", "Noto Sans", "DejaVu Sans", sans-serif; }
+.ph .sc { font-size: 10px; opacity: .85; font-variant-numeric: tabular-nums; }
+.word .wtext { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 1px dotted var(--faint); }
+.word .wtext:hover { color: var(--text); }
+.legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 16px; }
+.legend .bar { width: 140px; height: 8px; border-radius: 4px; }
+
+.detail { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.detail .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.detail .ipa { font-size: 34px; font-weight: 600; }
+.detail .scorebar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; max-width: 320px; }
+.detail .scorebar > div { height: 100%; background: var(--accent); }
+.tip { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 6px; }
+.kv { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.kv b { color: var(--text); font-weight: 600; }
+
+.flag-list { list-style: none; margin: 0; padding: 0; }
+.flag-list li { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; cursor: pointer; }
+.flag-list li:last-child { border-bottom: 0; }
+.flag-list .pill { font-family: var(--mono); font-size: 13px; background: var(--surface-2); border-radius: 6px; padding: 2px 8px; }
+.empty { color: var(--muted); font-style: italic; }
+
+.error { background: var(--warn-soft); border-left: 3px solid var(--warn); padding: 10px 14px; border-radius: 6px; margin-top: 14px; }
+.spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+.hist { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+.hist li { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); align-items: center; }
+.hist li:last-child { border-bottom: 0; }
+.hist .s { font-variant-numeric: tabular-nums; font-weight: 600; width: 34px; text-align: right; }
+.hist .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.hist .d { color: var(--faint); font-size: 12px; }
+footer { font-size: 12px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 8px; }
+.hidden { display: none !important; }
+kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--surface); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 11v2"/></svg>
+    <div>
+      <h1>Pronunciation Coach</h1>
+      <div class="sub">Phoneme-level feedback, running entirely on this computer</div>
+    </div>
+    <div class="spacer"></div>
+    <span class="chip-badge" id="modelBadge">loading model…</span>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </header>
+
+  <section class="card">
+    <h2>1 · What will you say?</h2>
+    <div class="sentence-row">
+      <input id="sentence" type="text" placeholder="Type a sentence, e.g. There was nothing left for me" autocomplete="off" spellcheck="false">
+      <button class="btn" id="hearBtn" title="Hear it read aloud by your system voice">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>Hear it
+      </button>
+    </div>
+    <div class="suggest" id="suggest"></div>
+  </section>
+
+  <section class="card">
+    <h2>2 · Record yourself</h2>
+    <div class="rec-row">
+      <button class="rec-btn" id="recBtn" aria-label="Record"><span class="dot"></span><span class="sq"></span></button>
+      <div class="rec-meta">
+        <div class="rec-status" id="recStatus">Press the red button (or <kbd>Space</kbd>) and read the sentence. Press again to stop.</div>
+        <div class="meter"><div id="meter"></div></div>
+      </div>
+      <label class="btn" title="Upload an audio file instead">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Upload
+        <input type="file" id="fileIn" accept="audio/*" class="hidden">
+      </label>
+      <button class="btn primary" id="scoreBtn" disabled>Score it</button>
+    </div>
+    <canvas class="wave hidden" id="wave"></canvas>
+    <div class="hint hidden" id="waveHint">Click the waveform to play back · after scoring, click a word to hear just that word</div>
+    <div class="error hidden" id="err"></div>
+  </section>
+
+  <section class="card hidden" id="results">
+    <h2>3 · How it went</h2>
+    <div class="results-top">
+      <div class="ring" id="ring"></div>
+      <div class="summary">
+        <div class="big" id="sumBig"></div>
+        <div class="small" id="sumSmall"></div>
+      </div>
+    </div>
+    <div class="words" id="words"></div>
+    <div class="legend">
+      <span>worth another take</span>
+      <div class="bar" id="legendBar"></div>
+      <span>sounds solid</span>
+    </div>
+  </section>
+
+  <div class="grid2 hidden" id="lower">
+    <section class="card" id="detailCard">
+      <h2>Sound detail</h2>
+      <div class="detail" id="detail"></div>
+    </section>
+    <section class="card">
+      <h2>Worth another take</h2>
+      <ul class="flag-list" id="flags"></ul>
+    </section>
+  </div>
+
+  <section class="card" id="histCard">
+    <h2>Your recent attempts</h2>
+    <ul class="hist" id="hist"></ul>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const TARGET_SR = 16000;
+const MAX_SECONDS = 20;
+const SUGGESTIONS = [
+  ["th / dh", "There was nothing left for me"],
+  ["th / dh", "I think this is the third thing"],
+  ["r / l", "The red lorry rolled along the road"],
+  ["v / w", "We very rarely visit the west"],
+  ["vowels", "The cat sat on a big bed"],
+  ["ee / ih", "Please sit in this seat"],
+  ["mixed", "We call it a bear"],
+  ["mixed", "Andy loves Canberra"],
+];
+
+let info = null;           // /api/info
+let wav16k = null;         // Float32Array of the current recording at 16 kHz
+let wavBlob = null;        // WAV blob sent to the server
+let lastResult = null;
+let selected = null;       // {w, p}
+let audioCtx = null;
+let playing = null;
+
+// ---------- theme ----------
+(function initTheme() {
+  let t = null;
+  try { t = localStorage.getItem("pc-theme"); } catch (e) {}
+  if (t) document.documentElement.dataset.theme = t;
+  $("themeBtn").onclick = () => {
+    const cur = document.documentElement.dataset.theme ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("pc-theme", next); } catch (e) {}
+    drawWave(); if (lastResult) renderResults(lastResult);
+  };
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { drawWave(); if (lastResult) renderResults(lastResult); });
+})();
+
+function isDark() {
+  const t = document.documentElement.dataset.theme;
+  return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+// Continuous single-hue ramp (deliberately not red/green, never a hard
+// bucket): deep blue = worth another look, near-background = solid.
+function rampColor(score) {
+  const t = Math.max(0, Math.min(1, score / 2));
+  if (isDark()) {
+    const l = 62 - t * 44;            // bright at 0 .. dim at 2
+    const s = 70 - t * 45;
+    return { bg: `hsl(212, ${s}%, ${l}%)`, fg: l > 50 ? "#0b1220" : "#e8ebef" };
+  }
+  const l = 40 + t * 52;
+  return { bg: `hsl(212, 62%, ${l}%)`, fg: l < 62 ? "#ffffff" : "#1a1a1a" };
+}
+
+// ---------- suggestions ----------
+function renderSuggestions(extra) {
+  const box = $("suggest");
+  box.innerHTML = '<span class="label">Try:</span>';
+  const all = SUGGESTIONS.concat(extra || []);
+  for (const [tag, s] of all) {
+    const b = document.createElement("button");
+    b.textContent = s; b.title = tag;
+    b.onclick = () => { $("sentence").value = s; updateScoreBtn(); };
+    box.appendChild(b);
+  }
+}
+renderSuggestions();
+
+// ---------- TTS reference ----------
+function speak(text, rate) {
+  if (!("speechSynthesis" in window) || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US"; u.rate = rate || 0.9;
+  const v = speechSynthesis.getVoices().find(v => /en[-_]US/i.test(v.lang));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+$("hearBtn").onclick = () => speak($("sentence").value.trim());
+if (!("speechSynthesis" in window)) $("hearBtn").classList.add("hidden");
+
+// ---------- audio helpers ----------
+function ctx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+async function decodeTo16k(arrayBuffer) {
+  const decoded = await ctx().decodeAudioData(arrayBuffer.slice(0));
+  const len = Math.ceil(decoded.duration * TARGET_SR);
+  const off = new OfflineAudioContext(1, Math.max(1, len), TARGET_SR);
+  const src = off.createBufferSource();
+  src.buffer = decoded; src.connect(off.destination); src.start();
+  const r = await off.startRendering();
+  return r.getChannelData(0).slice();
+}
+function encodeWav(samples, sr) {
+  const buf = new ArrayBuffer(44 + samples.length * 2);
+  const v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE");
+  w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, "data"); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  return new Blob([buf], { type: "audio/wav" });
+}
+function play(startS, endS) {
+  if (!wav16k) return;
+  if (playing) { try { playing.stop(); } catch (e) {} playing = null; }
+  const c = ctx();
+  const b = c.createBuffer(1, wav16k.length, TARGET_SR);
+  b.copyToChannel(wav16k, 0);
+  const s = c.createBufferSource();
+  s.buffer = b; s.connect(c.destination);
+  const st = Math.max(0, startS || 0);
+  const dur = endS != null ? Math.max(0.05, endS - st) : undefined;
+  s.start(0, st, dur);
+  playing = s;
+  animatePlayhead(st, dur != null ? dur : wav16k.length / TARGET_SR - st);
+}
+
+// ---------- waveform ----------
+let playhead = null;
+function animatePlayhead(st, dur) {
+  const t0 = performance.now();
+  const step = () => {
+    const el = (performance.now() - t0) / 1000;
+    if (el > dur) { playhead = null; drawWave(); return; }
+    playhead = st + el; drawWave(); requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function drawWave() {
+  const cv = $("wave");
+  if (!wav16k) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const g = cv.getContext("2d");
+  g.scale(dpr, dpr);
+  g.clearRect(0, 0, W, H);
+  const total = wav16k.length / TARGET_SR;
+  const x = (t) => (t / total) * W;
+
+  if (lastResult) {
+    lastResult.words.forEach((w, i) => {
+      if (w.start_s == null) return;
+      g.fillStyle = i % 2 ? "rgba(120,140,170,.10)" : "rgba(120,140,170,.18)";
+      g.fillRect(x(w.start_s), 0, Math.max(2, x(w.end_s) - x(w.start_s)), H);
+      g.fillStyle = cssVar("--muted"); g.font = "11px system-ui";
+      g.fillText(w.text.toLowerCase(), x(w.start_s) + 3, 12);
+    });
+  }
+  const step = Math.max(1, Math.floor(wav16k.length / W));
+  let peak = 1e-4;
+  for (let i = 0; i < wav16k.length; i++) { const a = Math.abs(wav16k[i]); if (a > peak) peak = a; }
+  g.fillStyle = cssVar("--accent");
+  const mid = H / 2 + 6;
+  for (let px = 0; px < W; px++) {
+    let mn = 1, mx = -1;
+    const s0 = px * step;
+    for (let i = s0; i < s0 + step && i < wav16k.length; i++) { const v = wav16k[i]; if (v < mn) mn = v; if (v > mx) mx = v; }
+    const h1 = Math.max(1, (mx - mn) / peak * (H - 24) / 2);
+    g.fillRect(px, mid - h1 / 2, 1, h1);
+  }
+  if (playhead != null) {
+    g.fillStyle = cssVar("--rec"); g.fillRect(x(playhead), 0, 2, H);
+  }
+}
+window.addEventListener("resize", drawWave);
+$("wave").onclick = (e) => {
+  if (!wav16k) return;
+  const r = e.target.getBoundingClientRect();
+  const t = (e.clientX - r.left) / r.width * (wav16k.length / TARGET_SR);
+  if (lastResult) {
+    const w = lastResult.words.find(w => w.start_s != null && t >= w.start_s - 0.05 && t <= w.end_s + 0.05);
+    if (w) { play(w.start_s - 0.08, w.end_s + 0.12); return; }
+  }
+  play(0);
+};
+
+// ---------- recording ----------
+let rec = null, recChunks = [], recStream = null, recTimer = null, recStart = 0, meterRAF = null;
+async function startRec() {
+  hideErr();
+  try {
+    recStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: false, noiseSuppression: false } });
+  } catch (e) {
+    showErr("Couldn't open the microphone (" + e.name + "). Check your browser's mic permission for this page.");
+    return;
+  }
+  const c = ctx(); await c.resume();
+  const an = c.createAnalyser(); an.fftSize = 1024;
+  c.createMediaStreamSource(recStream).connect(an);
+  const buf = new Float32Array(an.fftSize);
+  const tick = () => {
+    an.getFloatTimeDomainData(buf);
+    let s = 0; for (const v of buf) s += v * v;
+    const rms = Math.sqrt(s / buf.length);
+    $("meter").style.width = Math.min(100, rms * 400) + "%";
+    meterRAF = requestAnimationFrame(tick);
+  };
+  tick();
+  recChunks = [];
+  rec = new MediaRecorder(recStream);
+  rec.ondataavailable = (e) => e.data.size && recChunks.push(e.data);
+  rec.onstop = onRecStop;
+  rec.start();
+  recStart = performance.now();
+  $("recBtn").classList.add("recording");
+  recTimer = setInterval(() => {
+    const el = (performance.now() - recStart) / 1000;
+    $("recStatus").textContent = `Recording… ${el.toFixed(1)}s  (press again to stop)`;
+    if (el >= MAX_SECONDS) stopRec();
+  }, 100);
+}
+function stopRec() {
+  if (!rec || rec.state !== "recording") return;
+  rec.stop();
+  clearInterval(recTimer); cancelAnimationFrame(meterRAF);
+  $("meter").style.width = "0";
+  recStream.getTracks().forEach(t => t.stop());
+  $("recBtn").classList.remove("recording");
+}
+async function onRecStop() {
+  const blob = new Blob(recChunks, { type: rec.mimeType || "audio/webm" });
+  await loadAudio(await blob.arrayBuffer(), "recording");
+  if ($("sentence").value.trim()) score();
+}
+async function loadAudio(arrayBuffer, label) {
+  try {
+    wav16k = await decodeTo16k(arrayBuffer);
+  } catch (e) {
+    showErr("Couldn't decode that audio. Try a WAV, MP3, M4A, OGG or WebM file.");
+    return;
+  }
+  wavBlob = encodeWav(wav16k, TARGET_SR);
+  lastResult = null;
+  $("wave").classList.remove("hidden"); $("waveHint").classList.remove("hidden");
+  drawWave();
+  const dur = wav16k.length / TARGET_SR;
+  $("recStatus").textContent = `Got a ${dur.toFixed(1)}s ${label}. ` + ($("sentence").value.trim() ? "" : "Type the sentence you read, then press Score it.");
+  updateScoreBtn();
+}
+$("recBtn").onclick = () => (rec && rec.state === "recording") ? stopRec() : startRec();
+$("fileIn").onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  await loadAudio(await f.arrayBuffer(), "file");
+  e.target.value = "";
+};
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && document.activeElement.tagName !== "INPUT") {
+    e.preventDefault(); $("recBtn").click();
+  }
+  if (e.key === "Enter" && document.activeElement === $("sentence") && !$("scoreBtn").disabled) score();
+});
+$("sentence").addEventListener("input", updateScoreBtn);
+function updateScoreBtn() { $("scoreBtn").disabled = !(wavBlob && $("sentence").value.trim()); }
+$("scoreBtn").onclick = score;
+
+// ---------- scoring ----------
+function showErr(m) { $("err").textContent = m; $("err").classList.remove("hidden"); }
+function hideErr() { $("err").classList.add("hidden"); }
+
+async function score() {
+  const sentence = $("sentence").value.trim();
+  if (!wavBlob || !sentence) return;
+  hideErr();
+  const btn = $("scoreBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Scoring…';
+  const fd = new FormData();
+  fd.append("audio", wavBlob, "rec.wav");
+  fd.append("sentence", sentence);
+  try {
+    const r = await fetch("/api/score", { method: "POST", body: fd });
+    const j = await r.json();
+    if (!j.ok) { showErr(j.error || "Scoring failed."); return; }
+    lastResult = j; selected = null;
+    renderResults(j);
+    addHistory(j);
+  } catch (e) {
+    showErr("Couldn't reach the local scoring server. Is it still running?");
+  } finally {
+    btn.innerHTML = "Score it"; updateScoreBtn();
+  }
+}
+
+function ringSVG(pct) {
+  const r = 48, c = 2 * Math.PI * r;
+  return `<svg width="112" height="112" viewBox="0 0 112 112">
+    <circle cx="56" cy="56" r="${r}" fill="none" stroke="${cssVar("--surface-2")}" stroke-width="10"/>
+    <circle cx="56" cy="56" r="${r}" fill="none" stroke="${cssVar("--accent")}" stroke-width="10" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct / 100)}"/></svg>
+    <div class="val"><div><b>${Math.round(pct)}</b><span>out of 100</span></div></div>`;
+}
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function renderResults(j) {
+  $("results").classList.remove("hidden"); $("lower").classList.remove("hidden");
+  $("ring").innerHTML = ringSVG(j.overall.score_100);
+  const nf = j.overall.n_flagged;
+  $("sumBig").textContent = nf === 0 ? "Nothing flagged — every sound came back solid."
+    : `${nf} sound${nf > 1 ? "s" : ""} worth another take`;
+  $("sumSmall").innerHTML = `${j.overall.n_phones} sounds in ${j.words.length} words · scored in ${j.processing_s.toFixed(2)}s on this computer. ` +
+    `Click any sound for details, or a word to hear yourself say it.`;
+
+  const wbox = $("words"); wbox.innerHTML = "";
+  j.words.forEach((w, wi) => {
+    const el = document.createElement("div"); el.className = "word";
+    const ph = document.createElement("div"); ph.className = "phones";
+    w.phones.forEach((p, pi) => {
+      const c = rampColor(p.score);
+      const d = document.createElement("div");
+      d.className = "ph" + (j.worst && j.worst.w === wi && j.worst.p === pi ? " worst" : "") +
+        (selected && selected.w === wi && selected.p === pi ? " sel" : "");
+      d.style.background = c.bg; d.style.color = c.fg;
+      d.title = `/${p.ipa}/ (${p.arpa}) · ${p.score.toFixed(2)} / 2`;
+      d.innerHTML = `<span class="sym">${esc(p.ipa)}</span><span class="sc">${p.score.toFixed(1)}</span>`;
+      d.onclick = () => { selected = { w: wi, p: pi }; renderResults(j); renderDetail(j); };
+      ph.appendChild(d);
+    });
+    const t = document.createElement("div"); t.className = "wtext"; t.textContent = w.text;
+    t.title = "Play this word from your recording";
+    t.onclick = () => w.start_s != null && play(w.start_s - 0.08, w.end_s + 0.12);
+    el.appendChild(ph); el.appendChild(t); wbox.appendChild(el);
+  });
+  const stops = [0, .5, 1, 1.5, 2].map(s => rampColor(s).bg).join(",");
+  $("legendBar").style.background = `linear-gradient(90deg, ${stops})`;
+
+  const fl = $("flags"); fl.innerHTML = "";
+  const flagged = [];
+  j.words.forEach((w, wi) => w.phones.forEach((p, pi) => p.flagged && flagged.push({ w, p, wi, pi })));
+  flagged.sort((a, b) => a.p.score - b.p.score);
+  if (!flagged.length) fl.innerHTML = '<li class="empty">Nothing flagged in this attempt.</li>';
+  for (const f of flagged) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="pill">/${esc(f.p.ipa)}/</span><span>in <b>${esc(f.w.text.toLowerCase())}</b>` +
+      (f.p.heard_as ? ` · closer to /${esc(f.p.heard_as)}/` : "") + `</span>` +
+      `<span style="margin-left:auto;color:var(--muted);font-size:13px">${f.p.score.toFixed(2)}</span>`;
+    li.onclick = () => { selected = { w: f.wi, p: f.pi }; renderResults(j); renderDetail(j); };
+    fl.appendChild(li);
+  }
+  if (!selected && j.worst) selected = { w: j.worst.w, p: j.worst.p };
+  renderDetail(j);
+  drawWave();
+}
+
+function renderDetail(j) {
+  if (!selected) return;
+  const w = j.words[selected.w], p = w.phones[selected.p];
+  const ex = p.example ? ` as in “${esc(p.example)}”` : "";
+  $("detail").innerHTML = `
+    <div class="head"><span class="ipa">/${esc(p.ipa)}/</span>
+      <span style="color:var(--muted)">${esc(p.arpa)}${ex} · in <b style="color:var(--text)">${esc(w.text.toLowerCase())}</b></span></div>
+    <div><div class="scorebar"><div style="width:${p.score / 2 * 100}%"></div></div>
+      <div class="kv" style="margin-top:6px"><span>score <b>${p.score.toFixed(2)}</b> / 2</span>
+      ${p.heard_as ? `<span>model heard something closer to <b>/${esc(p.heard_as)}/</b></span>` : ""}
+      ${p.flagged ? `<span style="color:var(--warn)">worth another take</span>` : `<span>sounds solid</span>`}</div></div>
+    <div class="tip">${esc(p.tip)}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="dPlayMine">▶ My “${esc(w.text.toLowerCase())}”</button>
+      <button class="btn" id="dPlayRef">🔊 Reference “${esc(w.text.toLowerCase())}”</button>
+      ${p.example ? `<button class="btn" id="dPlayEx">🔊 “${esc(p.example)}”</button>` : ""}
+    </div>`;
+  $("dPlayMine").onclick = () => w.start_s != null && play(w.start_s - 0.08, w.end_s + 0.12);
+  $("dPlayRef").onclick = () => speak(w.text.toLowerCase(), 0.8);
+  if (p.example) $("dPlayEx").onclick = () => speak(p.example, 0.8);
+}
+
+// ---------- history (per-browser convenience only) ----------
+function loadHist() { try { return JSON.parse(localStorage.getItem("pc-history") || "[]"); } catch (e) { return []; } }
+function saveHist(h) { try { localStorage.setItem("pc-history", JSON.stringify(h.slice(0, 30))); } catch (e) {} }
+function addHistory(j) {
+  const h = loadHist();
+  h.unshift({ s: j.sentence, score: Math.round(j.overall.score_100), n: j.overall.n_flagged, t: Date.now() });
+  saveHist(h); renderHist();
+}
+function renderHist() {
+  const h = loadHist(), ul = $("hist");
+  if (!h.length) { ul.innerHTML = '<li class="empty">Your scored attempts will show up here (stored only in this browser).</li>'; return; }
+  ul.innerHTML = "";
+  for (const a of h) {
+    const li = document.createElement("li");
+    const d = new Date(a.t);
+    li.innerHTML = `<span class="s">${a.score}</span><span class="t" title="Practice this again">${esc(a.s)}</span>` +
+      `<span class="d">${a.n} flagged · ${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
+    li.querySelector(".t").onclick = () => { $("sentence").value = a.s; updateScoreBtn(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    ul.appendChild(li);
+  }
+}
+renderHist();
+
+// ---------- info / footer ----------
+(async function loadInfo() {
+  try {
+    info = await (await fetch("/api/info")).json();
+    $("modelBadge").textContent = info.model_label;
+    const m = info.metrics;
+    $("footer").innerHTML = `<b>How much should you trust this?</b> On held-out speakers, these phone scores correlate with
+      expert human ratings at <b>r = ${m.pearson.toFixed(2)}</b>. When a sound is flagged “worth another take”, it matches a
+      human-flagged error about <b>${Math.round(m.flag_precision * 100)}%</b> of the time, and about
+      <b>${Math.round(m.flag_recall * 100)}%</b> of human-flagged errors get flagged. The model was trained and evaluated only on
+      <b>Mandarin-L1</b> learners (speechocean762); accuracy for other accents hasn't been measured. Treat scores as a practice
+      signal, not a verdict. Everything runs locally; your audio never leaves this computer.`;
+    if (info.examples && info.examples.length) {
+      const box = $("suggest");
+      const br = document.createElement("div"); br.style.flexBasis = "100%"; box.appendChild(br);
+      const lab = document.createElement("span");
+      lab.className = "label"; lab.textContent = "No mic? Try an example recording:";
+      box.appendChild(lab);
+      info.examples.forEach((e, i) => {
+        const b = document.createElement("button");
+        b.textContent = "▶ " + e.sentence.toLowerCase().replace(/[.]$/, ""); b.title = "Load this example recording and score it";
+        b.onclick = async () => {
+          $("sentence").value = e.sentence;
+          const buf = await (await fetch(e.url)).arrayBuffer();
+          await loadAudio(buf, "example clip");
+          score();
+        };
+        box.appendChild(b);
+      });
+    }
+  } catch (e) {
+    $("modelBadge").textContent = "server offline";
+  }
+})();
+</script>
+</body>
+</html>
