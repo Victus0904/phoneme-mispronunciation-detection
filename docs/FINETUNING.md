@@ -6,10 +6,45 @@ GOP-SF, the strongest feature) separate correct from mispronounced phones
 better, then rebuild the scoring head on top. Optionally, add L2-ARCTIC for
 five more first languages.
 
-**Status: experimental.** First full run (speechocean762 only, Modal A10G,
-early-stopped after 9 epochs): GOP-SF-only validation r went from **0.454
-(frozen) to 0.618**. Whether the full v2 pipeline beats its test
-r = 0.753 is measured by the rebuild step below.
+## Results (2026-11-17)
+
+Two runs, each followed by the full v2 rebuild. Both test sets were scored
+once, after training, and every choice was made on validation speakers only.
+
+| | Frozen (v2 shipped) | Fine-tuned, speechocean only (`ft_top8`) | **Fine-tuned + L2-ARCTIC (`ft_l2`)** |
+|---|---|---|---|
+| speechocean762 test, phone r (full v2 pipeline) | 0.753 | 0.795 | **0.798** |
+| speechocean762 test, error AP | 0.642 | 0.672 | **0.672** |
+| Standard level: recall / precision | 40% / 69% | 52% / 66% | **54% / 65%** |
+| L2-ARCTIC test speakers, r (GOP-SF only) | 0.286 | 0.254 | **0.530** |
+| L2-ARCTIC test speakers, AP (GOP-SF only) | 0.323 | 0.295 | **0.555** |
+| Fluency / prosody test r | 0.82 / 0.81 | 0.828 / 0.817 | 0.826 / 0.818 |
+
+Per first language on the L2-ARCTIC test speakers (GOP-SF r, one held-out
+speaker each, so read these as indicative):
+
+| L1 | Frozen | `ft_top8` | `ft_l2` |
+|---|---|---|---|
+| Arabic | 0.198 | 0.180 | **0.441** |
+| Hindi | 0.149 | 0.131 | **0.409** |
+| Korean | 0.221 | 0.185 | **0.468** |
+| Mandarin | 0.216 | 0.173 | **0.457** |
+| Spanish | 0.202 | 0.193 | **0.525** |
+| Vietnamese | 0.474 | 0.429 | **0.688** |
+
+Takeaways:
+- Fine-tuning on speechocean762 alone improves speechocean762 but makes
+  every other accent *worse* than the frozen model. It specialises in
+  Mandarin-L1 children.
+- Adding L2-ARCTIC keeps the speechocean762 gain and nearly doubles accuracy
+  on unseen speakers of six first languages. `ft_l2` is the better model on
+  every row above.
+- The L2-ARCTIC rows measure GOP-SF alone, because the v2 head is trained on
+  speechocean762 only. Training the head on L2-ARCTIC too is the next step.
+- `ft_l2` inherits L2-ARCTIC's **non-commercial** license.
+
+Cost: about $2.75 on Modal for everything (two training runs, two rebuilds,
+evaluations, data prep), on A10G/T4 GPUs.
 
 ## What it trains
 
