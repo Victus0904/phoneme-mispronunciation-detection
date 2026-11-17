@@ -47,7 +47,10 @@ import numpy as np
 import torch
 from transformers import AutoProcessor, Wav2Vec2ForCTC
 
-MODEL_ID = "facebook/wav2vec2-lv-60-espeak-cv-ft"
+# ACOUSTIC_MODEL points the whole pipeline (extraction, features, the app) at a
+# fine-tuned copy, e.g. runs/ft_top8/best from scripts/finetune_acoustic.py.
+BASE_MODEL_ID = "facebook/wav2vec2-lv-60-espeak-cv-ft"
+MODEL_ID = os.environ.get("ACOUSTIC_MODEL", BASE_MODEL_ID)
 SEED = 42
 
 torch.manual_seed(SEED)
