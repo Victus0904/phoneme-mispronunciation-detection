@@ -163,19 +163,23 @@ functions.
 
 ## Using a fine-tuned model in the app
 
-Set `ACOUSTIC_MODEL` before starting the server, and use the head that was
-trained on that model's features (the shipped head expects the frozen model):
+Point `ACOUSTIC_MODEL` at the model and `MODELS_DIR` at the folder of heads
+that `rebuild` trained on its features. The shipped `models/` heads expect
+the frozen model, so the two must match.
 
 ```
-$env:ACOUSTIC_MODEL = "E:\models\ft_top8"   # PowerShell
-$env:HEAD_BUNDLE = "E:\models\ft_top8\head_v2.joblib"
+modal volume get pmd-ft results/ft_l2 ./runs/       # heads, strictness, figures
+modal volume get pmd-ft runs/ft_l2/best ./runs/ft_l2/  # the 1.3 GB model
+$env:ACOUSTIC_MODEL = "runs/ft_l2/best"              # PowerShell
+$env:MODELS_DIR = "runs/ft_l2"
 python server.py
 ```
 
-To ship it, upload the model folder to the Hugging Face Hub (1.3 GB is too
-large for git), point `BASE_MODEL_ID`'s default at it, and commit the new
-`models/*.joblib` and `models/strictness.json` together. A model trained
-with `--l2arctic` inherits L2-ARCTIC's non-commercial license.
+`MODELS_DIR` may also hold `pairs_calibration.json` (refit with
+`scripts/synth_pairs.ps1` + `check_pairs.py` + `fit_pairs_calibration.py`)
+and `model_card.json` (`scripts/finetune_report.py`), which the page shows
+under "How accurate is this?". A model trained with `--l2arctic` inherits
+L2-ARCTIC's non-commercial license.
 
 ## Hosting the website on Modal
 
