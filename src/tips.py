@@ -77,7 +77,8 @@ def _base(phone: str) -> str:
 
 
 def get_tip(arpa_phone: str) -> str:
-    return TIPS.get(_base(arpa_phone), DEFAULT_TIP)
+    # the table uses " -- " as a separator; render it as readable punctuation
+    return TIPS.get(_base(arpa_phone), DEFAULT_TIP).replace(" -- ", "; ")
 
 
 def get_example(arpa_phone: str):

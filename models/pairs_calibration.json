@@ -1,26 +1,31 @@
 {
  "bias_ab": {
-  "ae-ah": -0.001,
-  "ae-eh": -2.04,
-  "dh-d": -2.528,
-  "final-dt": 2.774,
-  "ih-iy": -0.977,
-  "n-ng": -2.415,
-  "r-l": -0.616,
-  "s-sh": -2.545,
   "th-s": -3.891,
   "th-t": -2.326,
-  "uh-uw": -2.174,
-  "v-b": 2.935,
+  "dh-d": -2.528,
+  "r-l": -0.616,
   "v-w": 0.461,
-  "z-s": -1.895
+  "v-b": 2.935,
+  "ih-iy": -0.977,
+  "ae-eh": -2.04,
+  "ae-ah": -0.001,
+  "n-ng": -2.415,
+  "s-sh": -2.545,
+  "z-s": -1.895,
+  "final-dt": 2.774,
+  "uh-uw": -2.174,
+  "p-b": 1.096,
+  "f-p": 1.36,
+  "ch-sh": -1.941,
+  "jh-ch": -0.516,
+  "y-jh": 1.943
  },
  "margin": 1.0,
- "note": "Per-contrast offset on LL(word A) - LL(word B), fitted on Windows SAPI voices David/Hazel/Zira saying both words of every pair (scripts/check_pairs.py). Leave-one-voice-out: 81.5% correct, 13.7% unsure, 4.9% wrong.",
+ "note": "Per-contrast offset on LL(word A) - LL(word B), fitted on Windows SAPI voices David/Hazel/Zira saying both words of every pair (scripts/check_pairs.py, scripts/fit_pairs_calibration.py). Leave-one-voice-out: 82.0% correct, 12.0% unsure, 6.0% wrong.",
  "check": {
-  "correct": 0.815,
-  "unsure": 0.137,
-  "wrong": 0.049,
-  "n_recordings": 432
+  "correct": 0.82,
+  "unsure": 0.12,
+  "wrong": 0.06,
+  "n_recordings": 582
  }
 }

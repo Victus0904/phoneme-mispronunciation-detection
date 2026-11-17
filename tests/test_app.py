@@ -48,6 +48,11 @@ class AppTest(unittest.TestCase):
         self.assertEqual(set(info["strictness"]), set(LEVELS))
         recalls = [info["strictness"][k]["recall"] for k in LEVELS]
         self.assertEqual(recalls, sorted(recalls), "stricter levels must catch more errors")
+        card = info["model_card"]  # only present when MODELS_DIR holds a fine-tuned run
+        if card is not None:
+            for side in ("frozen", "finetuned"):
+                self.assertIn("pearson", card["speechocean_test"][side])
+                self.assertIn("r", card["accents_test"][side])
 
     def test_result_shape(self):
         j = self.score("substitution_there.wav")
@@ -112,7 +117,8 @@ class AppTest(unittest.TestCase):
 
     # ------------------------------------------------------------ pairs + coach
     def test_pairs_are_calibrated(self):
-        with open(os.path.join(ROOT, "models", "pairs_calibration.json")) as f:
+        from src.scorer import PAIRS_FILE  # the active model's calibration (MODELS_DIR), else models/
+        with open(PAIRS_FILE) as f:
             bias = json.load(f)["bias_ab"]
         for s in PAIR_SETS:
             self.assertIn(s["id"], bias)

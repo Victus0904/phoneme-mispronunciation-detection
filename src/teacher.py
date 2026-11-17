@@ -96,9 +96,12 @@ def build_facts(result, max_sounds=3):
         if key in seen:
             continue
         seen.add(key)
-        focus.append({"sound": spoken_name(p["arpa"]), "word": word,
-                      "sounded_closer_to": spoken_name_ipa(p.get("heard_as")) if p.get("heard_as") else None,
-                      "how_to_fix": get_tip(p["arpa"]).replace(" -- ", "; ")})
+        item = {"sound": spoken_name(p["arpa"]), "word": word,
+                "sounded_closer_to": spoken_name_ipa(p.get("heard_as")) if p.get("heard_as") else None,
+                "how_to_fix": get_tip(p["arpa"]).replace(" -- ", "; ")}
+        if p.get("l1_note"):
+            item["common_for_first_language"] = p["l1_note"]
+        focus.append(item)
         if len(focus) == max_sounds:
             break
     strong = [w["text"].lower() for w in result["words"] if min(p["score"] for p in w["phones"]) >= 1.8]
@@ -106,6 +109,11 @@ def build_facts(result, max_sounds=3):
              "sounds_scored": result["overall"]["n_phones"],
              "scoring_strictness": result["overall"].get("strictness", "standard").replace("_", " "), "sounds_worth_another_take": result["overall"]["n_flagged"],
              "words_that_sounded_clear": strong[:6], "focus_sounds": focus}
+    if result.get("l1"):
+        from src.l1_profiles import BY_CODE
+        lang = BY_CODE.get(result["l1"])
+        if lang and lang["code"] != "other":
+            facts["learner_first_language"] = lang["label"]
     fl = result.get("fluency")
     if fl:
         facts["fluency_out_of_10"] = fl["fluency_10"]
@@ -128,7 +136,10 @@ def template_feedback(facts, name):
         f = facts["focus_sounds"][0]
         line = f'Let\'s polish {f["sound"]} in "{f["word"]}"'
         line += f', it came out closer to {f["sounded_closer_to"]}.' if f["sounded_closer_to"] else "."
-        parts += [line, f["how_to_fix"].split(";")[0].rstrip(".") + ".", "Give it another go!"]
+        parts += [line, f["how_to_fix"].split(";")[0].rstrip(".") + "."]
+        if f.get("common_for_first_language") and facts.get("learner_first_language"):
+            parts.append(f'That one is common for {facts["learner_first_language"]} speakers, so it\'s a great sound to focus on.')
+        parts.append("Give it another go!")
     if facts.get("long_pauses_between_words", 0) >= 2:
         parts.insert(-1, "Also try to keep the words flowing, with fewer long pauses.")
     return " ".join(parts)
@@ -144,6 +155,7 @@ You receive FACTS measured by an automatic phoneme scorer. Rules:
 - Talk about at most two of the focus sounds, using the sound description and word exactly as given. If "sounded_closer_to" is given, you may mention it.
 - For how to fix a sound, paraphrase ONLY the given "how_to_fix" text. Never add any other mouth, tongue or lip instructions of your own.
 - If fluency facts are given and fluency is below 7 or there were 2+ long pauses, you may add ONE short sentence about keeping the words flowing.
+- If a focus sound has "common_for_first_language", you may say in one short, encouraging clause that this is a common one for speakers of their first language, paraphrasing ONLY that text. Never generalise about the learner or their language beyond it.
 - Never claim to have heard anything that is not in the facts. Do not mention numbers other than the overall score, and only if it helps.
 - End by inviting them to try again (or, if nothing needs work, to try a harder sentence).
 {style}"""
@@ -161,6 +173,10 @@ Rules:
 - For HOW to make a sound (tongue, lips, teeth, voicing), use ONLY the matching entry in the TIP TABLE below, paraphrased. If the sound isn't in the table, say you don't have a specific tip and suggest listening to the reference and practising with a minimal-pair drill. Never invent articulation advice.
 - If LAST RESULT is given, you may refer to it, but never claim to have heard anything that is not in it. You cannot hear the learner's question audio as pronunciation practice.
 - Be honest that scores come from an automatic scorer and are a practice guide.
+- LEARNER says what their first language is and which sounds are worth focusing on for it. You may use it to suggest what to practise, but never generalise about the learner or their language beyond it.
+
+LEARNER:
+{learner}
 
 TIP TABLE (ARPAbet sound: tip, example word):
 {tips}
@@ -338,11 +354,18 @@ class Teacher:
     def can_listen(self):
         return bool(self.keys["groq"])
 
-    def answer(self, question, history=(), result=None):
+    def answer(self, question, history=(), result=None, l1=None):
         """Spoken-style reply to a learner's question (text, provider)."""
         context = json.dumps(build_facts(result), ensure_ascii=False) if result else "(none yet)"
         from src.pairs import PAIR_SETS
-        system = QA_PROMPT.format(name=self.name, tips=_tip_table(), context=context,
+        learner = "(first language not given)"
+        if l1:
+            from src.l1_profiles import profile
+            pr = profile(l1)
+            learner = json.dumps({"first_language": pr["label"], "focus_sounds": [
+                {"sound": f["name"], "note": f.get("note") or f.get("evidence")} for f in pr["focus"][:4]]},
+                ensure_ascii=False)
+        system = QA_PROMPT.format(name=self.name, tips=_tip_table(), context=context, learner=learner,
                                   pairs="; ".join(f'{st["title"]} ({", ".join("/".join(p) for p in st["pairs"][:3])})'
                                                   for st in PAIR_SETS))
         convo = "".join(f"{'Learner' if h.get('role') == 'user' else self.name}: {str(h.get('text', ''))[:400]}\n"

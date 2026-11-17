@@ -25,9 +25,16 @@ from src.text import text_to_words
 from src.tips import get_example, get_tip
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_BUNDLE = os.path.join(ROOT, "models", "head_v2.joblib")
-UTT_BUNDLE = os.path.join(ROOT, "models", "utt_v2.joblib")
-STRICTNESS_FILE = os.path.join(ROOT, "models", "strictness.json")
+# MODELS_DIR selects a whole set of heads trained on one acoustic model's
+# features (head_v2.joblib, utt_v2.joblib, strictness.json), e.g. the output
+# of scripts/modal_app.py::rebuild. Pair it with ACOUSTIC_MODEL (src/acoustic.py).
+MODELS_DIR = os.environ.get("MODELS_DIR", os.path.join(ROOT, "models"))
+DEFAULT_BUNDLE = os.path.join(MODELS_DIR, "head_v2.joblib")
+UTT_BUNDLE = os.path.join(MODELS_DIR, "utt_v2.joblib")
+STRICTNESS_FILE = os.path.join(MODELS_DIR, "strictness.json")
+# per-model minimal-pair offsets; fall back to the shipped ones
+PAIRS_FILE = next((p for p in (os.path.join(MODELS_DIR, "pairs_calibration.json"),
+                               os.path.join(ROOT, "models", "pairs_calibration.json")) if os.path.exists(p)), None)
 TARGET_SR = 16000
 MAX_AUDIO_SECONDS = 20.0
 SILENCE_RMS_THRESHOLD = 1e-4
@@ -212,8 +219,7 @@ class Scorer:
         if target not in (a, b):
             raise ScoringError("Unknown target word.")
         if not hasattr(self, "_pair_cal"):
-            path = os.path.join(ROOT, "models", "pairs_calibration.json")
-            self._pair_cal = json.load(open(path)) if os.path.exists(path) else {"bias_ab": {}, "margin": 1.0}
+            self._pair_cal = json.load(open(PAIRS_FILE)) if PAIRS_FILE else {"bias_ab": {}, "margin": 1.0}
         d_ab = self._pair_llr(wav, sr, a, b) - self._pair_cal["bias_ab"].get(set_id, 0.0)
         margin = self._pair_cal["margin"]
         heard = a if d_ab > margin else b if d_ab < -margin else None

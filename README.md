@@ -7,9 +7,10 @@ one.
 
 ![Pronunciation Coach scoring "Andy loves Canberra"](docs/app_screenshot.png)
 
-- **Frozen acoustic model, no fine-tuning.** It uses
-  `facebook/wav2vec2-lv-60-espeak-cv-ft` as-is. Only a small scoring head
-  is trained.
+- **Small, honest training footprint.** The default build uses
+  `facebook/wav2vec2-lv-60-espeak-cv-ft` frozen and trains only a small
+  scoring head. An optional multi-accent fine-tune (the hosted site uses it)
+  retrains the model's top 8 layers; see [Fine-tuned model](#fine-tuned-multi-accent-model).
 - **No LLM in the scoring.** Scores come from the acoustic model's own
   phone-level evidence. Coaching tips are a hand-written table, because a
   wrong generated articulation instruction is worse than a correct generic
@@ -40,6 +41,29 @@ The v1 column is v1's recipe re-run on the same full test split. On the
   <img src="figures/v2_correlation_scatter.png" width="48%" alt="v2 predicted vs human phone scores">
 </p>
 
+## Fine-tuned multi-accent model
+
+`scripts/finetune_acoustic.py` fine-tunes the top 8 layers on
+speechocean762 + L2-ARCTIC (24 speakers, 6 first languages). Every number
+below is on speakers the model never trained on; test splits were scored
+once. Details: [`docs/FINETUNING.md`](docs/FINETUNING.md).
+
+| | Frozen (default) | **Fine-tuned (`ft_l2`)** |
+|---|---|---|
+| speechocean762 test, phone r | 0.753 | **0.798** |
+| speechocean762 test, error AP | 0.642 | **0.672** |
+| Real errors flagged at Standard (recall / precision) | 40% / 69% | **54% / 65%** |
+| L2-ARCTIC held-out speakers, 6 first languages (GOP-SF r) | 0.286 | **0.530** |
+
+<p>
+  <img src="figures/finetune_curves.png" width="62%" alt="Validation r per epoch vs the frozen model, and training losses">
+  <img src="figures/finetune_accents.png" width="36%" alt="Per-first-language r, frozen vs fine-tuned">
+</p>
+
+The fine-tuned model is **non-commercial** (CC BY-NC 4.0, from L2-ARCTIC).
+`python scripts/finetune_report.py --name ft_l2` regenerates these figures
+and the `model_card.json` the website shows under "How accurate is this?".
+
 ## Quick start
 
 You need Python (tested on 3.13) and **espeak-ng** (the model's tokenizer needs it at
@@ -65,7 +89,8 @@ Then:
    word from your recording.
 
 Scoring runs on your machine and recordings are never stored. Your recent
-attempts are saved in your browser only. If you add LLM keys, the coach
+attempts are saved in your browser, and in your account if you sign up
+(sentences and scores, never recordings). If you add LLM keys, the coach
 sends your sentence and scores (never your recording) to that service, and
 questions you *speak* to Maya are transcribed by Groq.
 
@@ -83,6 +108,22 @@ What else is in the app:
   Settings). The default flags only sounds it's fairly sure about; stricter
   levels catch more real errors at the cost of more false alarms (table
   below).
+- **Accounts and first-language tuning.** Sign up (or continue as a
+  guest), then pick your first language. The app ranks the sounds to focus
+  on, recommends lessons and minimal pairs, suggests sentences and adds a
+  short note to flagged sounds. For Arabic, Mandarin, Hindi, Korean, Spanish
+  and Vietnamese the focus sounds come from what speakers of that language
+  were actually marked wrong on in L2-ARCTIC (`models/l1_stats.json`);
+  German, French, Japanese, Portuguese and Russian use commonly described
+  patterns and are labelled as such. Accounts store email, name, a scrypt
+  password hash, the language and the practice history, so progress follows
+  you across devices (`src/accounts.py`; on Modal, one file per user on the
+  `pmd-accounts` volume). Logging out clears the history from that browser;
+  deleting the account deletes everything.
+- **Multi-accent model (optional).** `docs/FINETUNING.md` fine-tunes the
+  acoustic model on speechocean762 + L2-ARCTIC: test r 0.753 → 0.798, and
+  much better on held-out speakers of six other first languages. The hosted
+  Modal site uses it; it is non-commercial (CC BY-NC 4.0, from L2-ARCTIC).
 - **Lessons, progress tracking** (streaks, per-sound trend lines), A/B
   playback, and settings for voice, speed and feedback style.
 - **Installable** as a web app, or as an Android app: download the APK from
@@ -137,8 +178,10 @@ The full story, ablations and per-phone results are in
 
 ## Limitations
 
-- **Trained and evaluated only on Mandarin-L1 English learners**, mostly
-  children. Accuracy for other accents hasn't been measured.
+- **The default model is trained and evaluated only on Mandarin-L1 English
+  learners**, mostly children. The fine-tuned model was also checked on one
+  held-out speaker each of Arabic, Mandarin, Hindi, Korean, Spanish and
+  Vietnamese (r 0.41–0.69); other first languages haven't been measured.
 - Scores are a practice signal, not a verdict. At the default level about
   3 in 10 flags are false alarms (more at stricter levels). V, UW, L, TH and
   DH are the hardest sounds for the model.

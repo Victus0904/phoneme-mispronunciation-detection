@@ -1,0 +1,13 @@
+# Fine-tuning only (scripts/finetune_acoustic.py). Tested in a fresh venv on
+# Windows with a GTX 1650. torch below is the CUDA 13.0 build:
+#   pip install torch==2.14.0 --index-url https://download.pytorch.org/whl/cu130
+# (CUDA 13 still supports Turing / sm_75 cards; the cu128 index stops at 2.11.)
+# On Linux (Lightning AI etc.) the default PyPI torch wheel already has CUDA.
+# The steps after fine-tuning (extract_full.py, train_v2.py, ...) need the
+# full requirements.txt instead.
+torch==2.14.0
+transformers==5.16.1
+huggingface_hub==1.33.0
+numpy==2.5.5
+pyarrow==26.0.1
+soundfile==0.14.0

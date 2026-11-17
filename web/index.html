@@ -409,6 +409,49 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
   .stats { gap: 6px; }
   .stat { padding: 10px; } .stat .v { font-size: 17px; }
 }
+/* ---------- accounts & first language ---------- */
+.acct { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 14px; font-weight: 600; }
+.acct:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+.acct .ini { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 12px; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--surface-2); padding: 4px; border-radius: 12px; margin-top: 14px; }
+.auth-tabs button { border: 0; background: none; padding: 8px; border-radius: 9px; font-size: 14px; color: var(--text-2); }
+.auth-tabs button.on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); }
+.field input[type=text], .field input[type=email], .field input[type=password] { width: 100%; height: 42px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); padding: 0 12px; font: inherit; font-size: 15px; }
+.field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.form-err { margin-top: 12px; color: var(--rec); font-size: 13.5px; min-height: 1em; }
+.linkbtn { border: 0; background: none; color: var(--muted); font-size: 13.5px; text-decoration: underline; padding: 4px; }
+.linkbtn:hover { color: var(--text); }
+.save-nudge { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px 14px; border: 1px solid var(--accent-line); border-radius: 12px; background: var(--accent-soft); font-size: 13.5px; }
+.save-nudge.hidden { display: none; }
+.save-nudge > div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.save-nudge span { color: var(--muted); }
+.auth-wide { width: 100%; justify-content: center; margin-top: 10px; }
+.auth-or { display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; color: var(--muted); font-size: 12.5px; }
+.auth-or::before, .auth-or::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
+.mcard { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.mcard h5 { margin: 0 0 4px; font-size: 13px; color: var(--text); }
+.mcard .row b .was { color: var(--muted); font-weight: 500; }
+.mcard details { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.mcard details summary { cursor: pointer; }
+.mcard details .row { padding: 4px 0; }
+.langgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 16px; }
+.langgrid button { text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 14.5px; font-weight: 600; }
+.langgrid button small { display: block; font-weight: 500; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.langgrid button:hover, .langgrid button.on { border-color: var(--accent); background: var(--accent-soft); }
+.modal.wide { width: min(560px, 100%); }
+.foryou { margin-top: 16px; }
+.foryou .fy-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.foryou h4 { margin: 0; font-size: 15px; }
+.foryou .fy-ev { font-size: 12.5px; color: var(--muted); }
+.foryou ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.foryou li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.foryou li .nm { font-weight: 600; min-width: 92px; font-size: 14px; }
+.foryou li .why { flex: 1; font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
+.foryou li .btn { flex: none; }
+.recbadge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--warm-soft); color: var(--warm); font-size: 11.5px; font-weight: 700; letter-spacing: .02em; vertical-align: middle; }
+.l1box { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--warm-soft); color: var(--text); font-size: 13.5px; line-height: 1.55; }
+.l1box b { color: var(--warm); }
+@media (max-width: 640px) { .acct .nm { display: none; } .foryou li { flex-wrap: wrap; } .foryou li .nm { min-width: 0; } }
 </style>
 </head>
 <body>
@@ -426,6 +469,7 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
     </nav>
     <div class="spacer"></div>
     <div class="badge off" id="badge"><span class="dot"></span><span id="badgeText">Connecting…</span></div>
+    <button class="acct" id="acctBtn" aria-label="Account"><span class="nm">Sign up</span></button>
     <button class="icon-btn" id="settingsBtn" aria-label="Settings" title="Settings">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     </button>
@@ -456,8 +500,9 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
           <p class="lead">Type any English sentence: a line from a presentation, an interview answer, a name you want to get right.</p>
           <textarea class="compose" id="compose" rows="2" maxlength="200" placeholder="e.g. I think this is the third thing" spellcheck="true" aria-label="Sentence to practise"></textarea>
           <div class="counter" id="counter">0 / 200</div>
-          <div class="chips-head">Or try one of these</div>
+          <div class="chips-head" id="chipsHead">Or try one of these</div>
           <div class="chips" id="chips"></div>
+          <div class="foryou hidden" id="forYou"></div>
           <div class="step-actions">
             <button class="btn" id="hear1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7"/></svg>Hear it first</button>
             <div class="spacer"></div>
@@ -534,6 +579,11 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
             <div class="breakdown" id="breakdown"></div>
             <div class="legend"><span>Worth another take</span><div class="bar" id="legendBar"></div><span>On target</span></div>
             <canvas class="wave" id="wave" title="Click a word to hear yourself say it"></canvas>
+            <div class="save-nudge hidden" id="saveNudge" role="note">
+              <div><b>Keep your progress</b><span id="saveNudgeText">Create a free account to save your scores and pick up on any device.</span></div>
+              <button class="btn primary sm" id="nudgeSignup">Sign up</button>
+              <button class="icon-btn" id="nudgeClose" aria-label="Not now"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
             <div class="res-actions">
               <button class="btn primary" id="againBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Try again</button>
               <button class="btn" id="nextSentBtn">Next sentence <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
@@ -558,7 +608,8 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
             <div class="row"><span>Agreement with expert raters</span><b id="tR">–</b></div>
             <div class="row"><span>Flags that are real errors</span><b id="tP">–</b></div>
             <div class="row" style="border-bottom:0"><span>Real errors that get flagged</span><b id="tC">–</b></div>
-            <p>Scores are measured by a speech model checked against expert raters on speakers it never trained on (Mandarin-speaking learners; other accents not yet validated). <span id="trustCoach"></span></p>
+            <p>Scores are measured by a speech model checked against expert raters on speakers it never trained on (the figures above are for Mandarin-speaking learners). <span id="trustAccents"></span> <span id="trustCoach"></span></p>
+            <div class="mcard hidden" id="mcard"></div>
           </div>
         </div>
       </aside>
@@ -613,7 +664,7 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
   <!-- ================= PROGRESS ================= -->
   <section id="view-progress" class="hidden">
     <div class="page-head" style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
-      <div style="flex:1"><h2>Your progress</h2><p>Saved in this browser only.</p></div>
+      <div style="flex:1"><h2>Your progress</h2><p id="syncNote">Saved in this browser only. Sign up to keep it on every device.</p></div>
       <button class="btn ghost sm" id="clearBtn">Clear history</button>
     </div>
     <div class="tiles">
@@ -644,7 +695,7 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
 </main>
 
 <footer><div class="in">
-  <div id="footText">Scores come from a frozen speech model and a small scorer trained on expert ratings. Treat them as a practice guide, not a verdict.</div>
+  <div id="footText">Scores come from a speech model and a small scorer trained on expert ratings. Treat them as a practice guide, not a verdict.</div>
   <div><a href="https://github.com/Victus0904/phoneme-mispronunciation-detection" target="_blank" rel="noopener">How it works &amp; evaluation</a></div>
 </div></footer>
 <div class="toast" id="toast" role="status"></div>
@@ -664,11 +715,47 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
   </div>
 </div>
 
+<!-- sign up / log in -->
+<div class="modal-bg hidden" id="authModal" role="dialog" aria-label="Sign up or log in">
+  <div class="card modal">
+    <div style="display:flex;align-items:center"><h3 style="flex:1" id="authTitle">Create your account</h3>
+      <button class="icon-btn" id="authClose" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <p class="lead" style="margin:6px 0 0;color:var(--muted);font-size:14px" id="authLead">Free. Lessons tuned to your first language, and your progress saved on every device.</p>
+    <div class="auth-tabs" role="tablist"><button data-mode="signup" class="on">Sign up</button><button data-mode="login">Log in</button></div>
+    <form id="authForm" novalidate>
+      <div class="field" id="nameField"><label for="authName">Name <span style="color:var(--muted);font-weight:500">(optional)</span></label><input type="text" id="authName" autocomplete="name" maxlength="60"></div>
+      <div class="field"><label for="authEmail">Email</label><input type="email" id="authEmail" autocomplete="email" required></div>
+      <div class="field"><label for="authPw">Password</label><input type="password" id="authPw" autocomplete="new-password" minlength="8" required><small id="pwHelp">At least 8 characters.</small></div>
+      <div class="form-err" id="authErr" role="alert"></div>
+      <button type="submit" class="btn primary auth-wide" id="authSubmit">Create account</button>
+    </form>
+    <div class="auth-or"><span>or</span></div>
+    <button type="button" class="btn auth-wide" id="authGuest">Continue as guest</button>
+    <p class="note" style="margin:8px 0 0;text-align:center">No account needed to practise. As a guest, your progress stays in this browser only.</p>
+  </div>
+</div>
+
+<!-- first language -->
+<div class="modal-bg hidden" id="langModal" role="dialog" aria-label="Your first language">
+  <div class="card modal wide">
+    <div style="display:flex;align-items:center"><h3 style="flex:1" id="langTitle">What's your first language?</h3>
+      <button class="icon-btn" id="langClose" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <p style="margin:6px 0 0;color:var(--muted);font-size:14px">Every language makes different English sounds tricky. We'll suggest lessons, word pairs and tips for yours. You can change it any time in Settings.</p>
+    <div class="langgrid" id="langGrid"></div>
+    <p class="note" style="margin-top:14px">“Measured” languages use what speakers of that language actually got wrong in a research dataset; the scoring model was also checked on them. Others use commonly described patterns.</p>
+  </div>
+</div>
+
 <!-- settings -->
 <div class="modal-bg hidden" id="settings" role="dialog" aria-label="Settings">
   <div class="card modal">
     <div style="display:flex;align-items:center"><h3 style="flex:1">Settings</h3>
       <button class="icon-btn" id="settingsClose" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="field">
+      <label>Your first language</label>
+      <button class="btn" id="langChange" style="width:100%;justify-content:space-between"><span id="langCur">Not set</span><span style="color:var(--muted)">Change</span></button>
+    </div>
+    <div class="field" id="acctBox"></div>
     <div class="field">
       <label>Feedback style</label>
       <div class="seg" id="styleSeg"><button data-v="gentle">Gentle</button><button data-v="direct">Direct</button></div>
@@ -726,6 +813,18 @@ const LESSONS = [
   { id: "endings", icon: "z", title: "Word endings", desc: "Finish every word: final s, z, d, t and ng.", sounds: ["Z", "S", "D", "T", "NG"],
     items: ["She walked and talked for hours", "The dogs played in the yard", "Singing and dancing are fun",
             "He kept the books on the desk", "Those cars need new tyres"] },
+  { id: "jch", icon: "dʒ", title: "J, CH and SH", desc: "Jam, chair and share: three sounds made in the same spot.", sounds: ["JH", "CH", "SH", "ZH"],
+    items: ["Jack enjoyed the orange juice", "Change the channel each morning", "She chose a large cheese",
+            "The judge showed much patience", "Charlie shared his jacket"] },
+  { id: "pbf", icon: "p", title: "P, B and F", desc: "A puff of air for P, a buzz for B, teeth on lip for F.", sounds: ["P", "B", "F"],
+    items: ["Put the paper back on the pile", "Fifty people played football", "Bob bought a pair of blue pens",
+            "The puppy found a fluffy pillow", "Please pass the pepper"] },
+  { id: "er", icon: "ɜː", title: "The ER sound", desc: "The vowel in bird, her and work.", sounds: ["ER"],
+    items: ["The bird heard her first word", "Turn left at the third corner", "Her sister works on Thursday",
+            "The nurse learned German early", "Were the purple shirts dirty"] },
+  { id: "oh", icon: "oʊ", title: "Oh, aw and oo", desc: "Go, thought, book and food: keep these vowels apart.", sounds: ["OW", "AO", "UH", "UW"],
+    items: ["Go home and close the door", "I thought the boat was slow", "Don't throw the ball so low",
+            "The cook stood by the pool", "Show me the road to the coast"] },
   { id: "everyday", icon: "aɪ", title: "Everyday English", desc: "Phrases you'll use every single day.", sounds: [],
     items: ["Could you help me with this", "I would like a cup of coffee", "Nice to meet you",
             "Where is the nearest station", "Thank you so much for your help"] },
@@ -747,7 +846,11 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
 };
-const settings = Object.assign({ style: "gentle", strictness: "standard", voice: "auto", rate: 1.0, autoplay: true }, store.get("pc-settings", {}));
+const settings = Object.assign({ style: "gentle", strictness: "standard", voice: "auto", rate: 1.0, autoplay: true, l1: "" }, store.get("pc-settings", {}));
+// account (server-side, via an HttpOnly cookie) and the first-language profile
+let me = null, l1prof = null, langList = null;
+function currentL1() { return (me && me.l1) || settings.l1 || ""; }
+function recLessons() { return l1prof ? l1prof.lessons.filter(id => LESSONS.some(l => l.id === id)) : []; }
 function saveSettings() { store.set("pc-settings", settings); }
 
 // ---------------- helpers ----------------
@@ -820,7 +923,14 @@ document.querySelectorAll("#stepper .st").forEach(b => b.onclick = () => { const
 
 // step 1 ---------------------------------------------------------------
 function renderChips() {
-  const picks = LESSONS.slice(0, 6).map(L => [L, L.items[0]]);
+  let picks = LESSONS.slice(0, 6).map(L => [L, L.items[0]]);
+  const rec = recLessons();
+  if (rec.length) {  // sentences from the lessons for this learner's focus sounds, round-robin
+    picks = [];
+    for (let i = 0; picks.length < 6 && i < 5; i++)
+      for (const id of rec) { const L = LESSONS.find(l => l.id === id); if (L && L.items[i] && picks.length < 6) picks.push([L, L.items[i]]); }
+  }
+  $("chipsHead").textContent = l1prof ? `Or try one picked for ${l1prof.label} speakers` : "Or try one of these";
   $("chips").innerHTML = "";
   for (const [L, s] of picks) {
     const c = document.createElement("button"); c.className = "chip";
@@ -828,6 +938,19 @@ function renderChips() {
     c.onclick = () => { $("compose").value = s; onCompose(); lessonId = L.id; lessonStep = 0; toStep2(); };
     $("chips").appendChild(c);
   }
+}
+function renderForYou() {
+  const box = $("forYou");
+  if (!l1prof || !l1prof.focus.length) { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  box.innerHTML = `<div class="fy-head"><h4>Sounds to focus on as a ${esc(l1prof.label)} speaker</h4>
+      <span class="fy-ev">${esc(l1prof.evidence_label)}</span></div>
+    <ul>${l1prof.focus.slice(0, 4).map((f, i) => `<li><span class="nm">${esc(f.label || f.name)}</span>
+      <span class="why">${esc(f.note || f.evidence || f.tip)}${f.note && f.evidence ? ` <span style="color:var(--muted)">${esc(f.evidence)}</span>` : ""}</span>
+      ${f.lesson ? `<button class="btn sm" data-fy="${i}">Practise</button>` : ""}</li>`).join("")}</ul>`;
+  box.querySelectorAll("[data-fy]").forEach(b => b.onclick = () => {
+    const f = l1prof.focus[+b.dataset.fy]; startLesson(f.lesson, 0);
+  });
 }
 function onCompose() {
   const v = $("compose").value;
@@ -1004,12 +1127,13 @@ async function submit() {
   $("results").classList.add("hidden");
   bubbleLoading(`${coachName} is listening to your recording`);
   const fd = new FormData(); fd.append("audio", wavBlob, "rec.wav"); fd.append("sentence", sentence); fd.append("strictness", settings.strictness);
+  fd.append("l1", currentL1());
   let j;
   try { j = await (await fetch("/api/score", { method: "POST", body: fd })).json(); }
   catch (e) { j = { ok: false, error: info && info.hosted ? "Couldn't reach the server. Please try again in a moment." : "Couldn't reach the scoring server. Is it still running?" }; }
   if (!j.ok) { goStep(2); setRec("took"); showErr(j.error || "Something went wrong."); return; }
   result = j; selected = j.worst ? { w: j.worst.w, p: j.worst.p } : null;
-  renderResult(); saveAttempt(j);
+  renderResult(); saveAttempt(j); showSaveNudge();
   bubbleLoading(`${coachName} is preparing your feedback`);
   try {
     fb = await (await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: j.id, style: settings.style }) })).json();
@@ -1141,6 +1265,7 @@ function renderCoach() {
     <div class="coach-kv"><span>${p.flagged ? "Worth another take" : "On target"}</span><b>${p.score.toFixed(1)} / 2</b></div>
     ${p.heard_as ? `<div class="heard">This sounded closer to <b class="ipa">/${esc(p.heard_as)}/</b> than to <b class="ipa">/${esc(p.ipa)}/</b>.</div>` : ""}
     <div class="tipbox"><b>How to say it</b>${esc(p.tip)}</div>
+    ${p.l1_note && l1prof ? `<div class="l1box"><b>For ${esc(l1prof.label)} speakers:</b> ${esc(p.l1_note)}</div>` : ""}
     <div class="coach-actions">
       <button class="btn sm" id="cMine"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Hear yourself</button>
       <button class="btn sm" id="cRef"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/></svg>Reference</button>
@@ -1202,6 +1327,7 @@ function saveAttempt(j) {
            flu: j.fluency ? [j.fluency.fluency_10, j.fluency.prosody_10] : null,
            n: j.overall.n_phones, f: j.words.flatMap(w => w.phones.filter(p => p.flagged).map(p => [base(p.arpa), p.ipa, +p.score.toFixed(2)])) });
   store.set("pc-attempts", h.slice(-500));
+  queueSync();
 }
 function dayKey(t) { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
 function streak(h) {
@@ -1291,18 +1417,24 @@ function renderProgress() {
     $("hist").appendChild(li);
   }
 }
-$("clearBtn").onclick = () => { if (confirm("Clear all saved attempts in this browser?")) { store.set("pc-attempts", []); renderProgress(); toast("History cleared"); } };
+$("clearBtn").onclick = () => {
+  if (!confirm(me ? "Clear all saved attempts from your account and this browser?" : "Clear all saved attempts in this browser?")) return;
+  store.set("pc-attempts", []); renderProgress(); toast("History cleared");
+  if (me) pushProgress();
+};
 
 // ---------------- library ----------------
 function renderLibrary() {
   const h = history();
   $("lessons").innerHTML = "";
-  for (const L of LESSONS) {
+  const rec = recLessons();
+  const order = [...LESSONS].sort((a, b) => (rec.includes(a.id) ? rec.indexOf(a.id) : 99) - (rec.includes(b.id) ? rec.indexOf(b.id) : 99));
+  for (const L of order) {
     const mine = h.filter(a => a.lesson === L.id);
     const done = L.items.filter(it => mine.some(a => a.s.toLowerCase() === it.toLowerCase())).length;
     const best = mine.length ? Math.max(...mine.map(a => a.score)) : null;
     const b = document.createElement("button"); b.className = "lesson";
-    b.innerHTML = `<span class="ic">${esc(L.icon)}</span><h3>${esc(L.title)}</h3><p>${esc(L.desc)}</p>
+    b.innerHTML = `<span class="ic">${esc(L.icon)}</span><h3>${esc(L.title)}${rec.includes(L.id) ? `<span class="recbadge">For you</span>` : ""}</h3><p>${esc(L.desc)}</p>
       <div class="prog"><div style="width:${done / L.items.length * 100}%"></div></div>
       <div class="foot"><span>${done} of ${L.items.length} sentences</span><span>${best != null ? "Best score " + best : "Not started"}</span></div>`;
     b.onclick = () => {
@@ -1347,10 +1479,12 @@ function pairStats() { return store.get("pc-pairs", {}); }
 async function renderPairSets() {
   const d = await loadPairs(), stats = pairStats();
   $("pairsets").innerHTML = "";
-  for (const s of d.sets) {
+  const rec = l1prof ? l1prof.pairs : [];
+  const sets = [...d.sets].sort((a, b) => (rec.includes(a.id) ? rec.indexOf(a.id) : 99) - (rec.includes(b.id) ? rec.indexOf(b.id) : 99));
+  for (const s of sets) {
     const b = document.createElement("button"); b.className = "pairset";
     const st = stats[s.id];
-    b.innerHTML = `<b>${esc(s.title)}</b><span>${esc(s.pairs.slice(0, 3).map(p => p.join(" / ")).join(" · "))}…</span>` +
+    b.innerHTML = `<b>${esc(s.title)}${rec.includes(s.id) ? `<span class="recbadge">For you</span>` : ""}</b><span>${esc(s.pairs.slice(0, 3).map(p => p.join(" / ")).join(" · "))}…</span>` +
       (st ? `<div class="best">${st.ok} of ${st.n} right so far</div>` : "");
     b.onclick = () => startDrill(s.id);
     $("pairsets").appendChild(b);
@@ -1411,7 +1545,7 @@ $("pairMic").onclick = async () => {
   $("pairHint").textContent = "Tap, say the highlighted word, tap again";
   if (!r.ok) { toast(r.error || "Something went wrong"); return; }
   drill.n++; if (r.correct) drill.ok++;
-  const st = pairStats(); st[drill.set.id] = st[drill.set.id] || { ok: 0, n: 0 }; st[drill.set.id].n++; if (r.correct) st[drill.set.id].ok++; store.set("pc-pairs", st);
+  const st = pairStats(); st[drill.set.id] = st[drill.set.id] || { ok: 0, n: 0 }; st[drill.set.id].n++; if (r.correct) st[drill.set.id].ok++; store.set("pc-pairs", st); queueSync();
   r.tip = drill.set.tip;  // the hand-written tip for this contrast (src/tips.py)
   renderDrill(r);
   if (r.correct) speak("Yes! " + target, 1.0); else if (r.heard) speak(`That sounded like ${r.heard}. Try ${target} again.`, 0.95);
@@ -1459,7 +1593,7 @@ async function ask(text, wav) {
   const fd = new FormData();
   if (wav) fd.append("audio", wav, "q.wav"); else fd.append("text", text);
   fd.append("history", JSON.stringify(chatHist.slice(-6))); fd.append("result_id", lastResultId || "");
-  fd.append("voice", settings.voice === "auto" ? "1" : "0");
+  fd.append("voice", settings.voice === "auto" ? "1" : "0"); fd.append("l1", currentL1());
   if (text) addMsg("me", text);
   let r;
   try { r = await (await fetch("/api/ask", { method: "POST", body: fd })).json(); } catch (e) { r = { ok: false, error: "Couldn't reach the server." }; }
@@ -1489,6 +1623,22 @@ function fillVoices() {
 }
 function openSettings() {
   fillVoices();
+  $("langCur").textContent = l1prof ? l1prof.label : "Not set";
+  $("acctBox").innerHTML = me
+    ? `<label>Account</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+         <span style="flex:1;font-size:14px;color:var(--text-2)">Signed in as <b style="color:var(--text)">${esc(me.email)}</b></span>
+         <button class="btn sm" id="logoutBtn">Log out</button></div>
+       <button class="linkbtn" id="deleteBtn" style="margin-top:6px">Delete my account</button>
+       <small>Your account stores your email, name, first language and practice history (sentences and scores, never recordings). Deleting the account deletes all of it.</small>`
+    : `<label>Account</label><button class="btn" id="setSignup">Sign up or log in</button>
+       <small>Save your first language across devices.</small>`;
+  if ($("logoutBtn")) $("logoutBtn").onclick = logout;
+  if ($("deleteBtn")) $("deleteBtn").onclick = (e) => {  // two clicks, no browser dialog
+    const b = e.currentTarget;
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Click again to permanently delete your account"; b.style.color = "var(--rec)"; return; }
+    deleteAccount();
+  };
+  if ($("setSignup")) $("setSignup").onclick = () => { $("settings").classList.add("hidden"); openAuth("signup"); };
   document.querySelectorAll("#styleSeg button").forEach(b => b.classList.toggle("on", b.dataset.v === settings.style));
   document.querySelectorAll("#strictSeg button").forEach(b => b.classList.toggle("on", b.dataset.v === settings.strictness));
   $("strictHelp").textContent = strictHelp();
@@ -1516,6 +1666,207 @@ $("voiceSel").onchange = e => { settings.voice = e.target.value; saveSettings();
 $("rateIn").oninput = e => { settings.rate = +e.target.value; $("rateVal").textContent = `${settings.rate.toFixed(2)}×`; saveSettings(); };
 $("autoIn").onchange = e => { settings.autoplay = e.target.checked; saveSettings(); };
 
+// ---------------- account & first language ----------------
+async function api(path, body) {
+  const r = await fetch(path, body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  return { status: r.status, ...j };
+}
+function renderAcct() {
+  const b = $("acctBtn");
+  b.innerHTML = me ? `<span class="ini">${esc((me.name || me.email)[0].toUpperCase())}</span><span class="nm">${esc(me.name || me.email.split("@")[0])}</span>`
+                   : `<span class="nm">Sign up</span>`;
+  b.title = me ? `Signed in as ${me.email}` : "Sign up or log in";
+}
+$("acctBtn").onclick = () => me ? openSettings() : openAuth("signup");
+
+let authMode = "signup";
+function openAuth(mode) {
+  authMode = mode;
+  document.querySelectorAll(".auth-tabs button").forEach(b => b.classList.toggle("on", b.dataset.mode === mode));
+  const up = mode === "signup";
+  $("authTitle").textContent = up ? "Create your account" : "Welcome back";
+  $("authLead").textContent = up ? "Free. Lessons tuned to your first language, and your progress saved on every device." : "Log in to pick up where you left off, on any device.";
+  $("nameField").classList.toggle("hidden", !up);
+  $("pwHelp").classList.toggle("hidden", !up);
+  $("authPw").autocomplete = up ? "new-password" : "current-password";
+  $("authSubmit").textContent = up ? "Create account" : "Log in";
+  $("authErr").textContent = "";
+  $("authModal").classList.remove("hidden");
+  setTimeout(() => (up ? $("authName") : $("authEmail")).focus(), 50);
+}
+// ---- progress sync: signed-in users' history follows them to every device ----
+let syncTimer = null;
+function mergeProgress(remote) {
+  const seen = new Set(), all = [];
+  for (const a of [...(remote.attempts || []), ...history()]) {
+    const k = a.t + "|" + a.s;
+    if (!seen.has(k)) { seen.add(k); all.push(a); }
+  }
+  all.sort((a, b) => a.t - b.t);
+  store.set("pc-attempts", all.slice(-500));
+  const st = pairStats();
+  for (const [id, v] of Object.entries(remote.pairs || {})) {
+    const l = st[id] || { ok: 0, n: 0 };
+    st[id] = l.n >= v.n ? l : v;  // keep whichever device has practised that set more
+  }
+  store.set("pc-pairs", st);
+}
+async function pushProgress() {
+  syncTimer = null;
+  if (!me) return;
+  const r = await api("/api/progress", { attempts: history(), pairs: pairStats() }).catch(() => ({}));
+  setSyncNote(r.ok ? "saved" : "error");
+}
+function queueSync() { if (me) { clearTimeout(syncTimer); syncTimer = setTimeout(pushProgress, 1500); } }
+async function syncProgress() {
+  if (!me) return;
+  try {
+    const r = await api("/api/progress");
+    if (!r.ok) return;
+    const before = history().length;
+    mergeProgress(r);
+    if (history().length !== (r.attempts || []).length || before !== history().length) await pushProgress();
+    else setSyncNote("saved");
+    if (!$("view-progress").classList.contains("hidden")) renderProgress();
+  } catch (e) {}
+}
+function setSyncNote(state) {
+  const n = $("syncNote"); if (!n) return;
+  n.textContent = !me ? "Saved in this browser only. Sign up to keep it on every device."
+    : state === "error" ? "Couldn't reach the server; your progress is safe in this browser and will sync later."
+    : `Synced to ${me.email}.`;
+}
+
+// After a guest's 1st, 5th, 15th... result, suggest an account (once per visit if dismissed).
+function showSaveNudge() {
+  const n = history().length, box = $("saveNudge");
+  let dismissed = false; try { dismissed = sessionStorage.getItem("pc-nudge-off") === "1"; } catch (e) {}
+  if (me || dismissed || ![1, 5, 15, 40].includes(n)) { box.classList.add("hidden"); return; }
+  $("saveNudgeText").textContent = n === 1 ? "Create a free account to save this score and pick up on any device."
+    : `You've practised ${n} sentences. Create a free account so they're not lost if this browser's data is cleared.`;
+  box.classList.remove("hidden");
+}
+$("nudgeSignup").onclick = () => { $("saveNudge").classList.add("hidden"); openAuth("signup"); };
+$("nudgeClose").onclick = () => { $("saveNudge").classList.add("hidden"); try { sessionStorage.setItem("pc-nudge-off", "1"); } catch (e) {} };
+
+// Welcome gate: every new visit asks visitors who aren't signed in to sign up, log in or
+// continue as a guest. "Guest" lasts for this browser tab session only.
+function guestThisVisit() { try { return sessionStorage.getItem("pc-guest") === "1"; } catch (e) { return false; } }
+function setSignedIn(v) { store.set("pc-signed-in", !!v); if (v) store.set("pc-has-account", true); }
+function closeAuth() { $("authModal").classList.add("hidden"); }
+function continueAsGuest() {
+  try { sessionStorage.setItem("pc-guest", "1"); } catch (e) {}
+  closeAuth(); if (!currentL1()) openLang();
+}
+function authGate() {
+  if (me || guestThisVisit() || !$("authModal").classList.contains("hidden")) return;
+  openAuth(store.get("pc-has-account", false) ? "login" : "signup");
+}
+document.querySelectorAll(".auth-tabs button").forEach(b => b.onclick = () => openAuth(b.dataset.mode));
+$("authClose").onclick = continueAsGuest;
+$("authGuest").onclick = continueAsGuest;
+$("authForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const email = $("authEmail").value.trim(), password = $("authPw").value;
+  if (!email || !password) { $("authErr").textContent = "Please enter your email and password."; return; }
+  $("authSubmit").disabled = true; $("authErr").textContent = "";
+  const body = authMode === "signup" ? { email, password, name: $("authName").value.trim(), l1: settings.l1 || undefined } : { email, password };
+  let r;
+  try { r = await api(authMode === "signup" ? "/api/signup" : "/api/login", body); }
+  catch (err) { r = { ok: false, error: "Couldn't reach the server. Please try again." }; }
+  $("authSubmit").disabled = false;
+  if (!r.ok) { $("authErr").textContent = r.error || "Something went wrong."; return; }
+  me = r.user; $("authPw").value = ""; closeAuth(); setSignedIn(true); renderAcct(); syncProgress();
+  if (me.l1) { await loadProfile(me.l1); toast(`Welcome back${me.name ? ", " + me.name : ""}!`); }
+  else openLang(true);
+};
+
+async function loadLanguages() {
+  if (!langList) { try { langList = (await api("/api/languages")).languages || []; } catch (e) { langList = []; } }
+  return langList;
+}
+async function openLang(afterSignup) {
+  const list = await loadLanguages();
+  $("langTitle").textContent = afterSignup ? `Welcome${me && me.name ? ", " + me.name : ""}! What's your first language?` : "What's your first language?";
+  $("langGrid").innerHTML = list.map(l => `<button data-code="${esc(l.code)}" class="${l.code === currentL1() ? "on" : ""}">${esc(l.label)}<small>${l.measured ? "Measured" : l.code === "other" ? "General tips" : "Common patterns"}</small></button>`).join("");
+  $("langGrid").querySelectorAll("button").forEach(b => b.onclick = () => chooseLanguage(b.dataset.code));
+  $("langModal").classList.remove("hidden");
+}
+$("langClose").onclick = () => $("langModal").classList.add("hidden");
+$("langChange").onclick = () => { $("settings").classList.add("hidden"); openLang(); };
+async function chooseLanguage(code) {
+  settings.l1 = code; saveSettings();
+  if (me) {
+    const r = await api("/api/profile", { l1: code });
+    if (r.ok) me = r.user; else toast(r.error || "Couldn't save that — try again.");
+  }
+  $("langModal").classList.add("hidden");
+  await loadProfile(code);
+  toast(l1prof ? `Tuned for ${l1prof.label} speakers` : "Saved");
+}
+async function loadProfile(code) {
+  l1prof = null;
+  if (code) { try { const r = await api("/api/l1/" + encodeURIComponent(code)); if (r.ok) l1prof = r.profile; } catch (e) {} }
+  applyProfile();
+}
+function applyProfile() {
+  renderChips(); renderForYou(); renderTrustNote();
+  if (!$("view-library").classList.contains("hidden")) renderLibrary();
+  if (!$("view-pairs").classList.contains("hidden")) renderPairSets();
+}
+function renderTrustNote() {
+  const measured = ["Arabic", "Mandarin", "Hindi", "Korean", "Spanish", "Vietnamese"];
+  $("trustAccents").textContent = l1prof && l1prof.measured
+    ? `It was also checked on held-out ${l1prof.label} speakers.`
+    : l1prof && l1prof.code !== "other"
+      ? `It hasn't been checked on ${l1prof.label} speakers yet, so treat scores as a rougher guide.`
+      : `Checked on held-out speakers of ${measured.join(", ")}.`;
+  renderModelCard();
+}
+function renderModelCard() {
+  const c = info && info.model_card, box = $("mcard");
+  if (!c) { box.classList.add("hidden"); return; }
+  const so = c.speechocean_test, ac = c.accents_test, f2 = v => (+v).toFixed(2), pc = v => Math.round(v * 100) + "%";
+  const row = (label, a, b, last) => `<div class="row"${last ? ' style="border-bottom:0"' : ""}><span>${label}</span><b><span class="was">${a} →</span> ${b}</b></div>`;
+  const mine = l1prof && l1prof.data && ac.by_l1[l1prof.data];
+  box.innerHTML = `<h5>${esc(c.label)}</h5>
+    <p style="margin:0 0 6px">Fine-tuned on two expert-annotated datasets covering ${Object.keys(ac.by_l1).length} first languages. Before → after fine-tuning, on speakers it never trained on:</p>
+    ${row("Agreement with experts", f2(so.frozen.pearson), f2(so.finetuned.pearson))}
+    ${row("Real errors flagged (Standard)", pc(so.frozen.recall), pc(so.finetuned.recall))}
+    ${mine ? row(`${esc(l1prof.label)} speakers`, f2(mine.frozen), f2(mine.finetuned)) : ""}
+    ${row(`Other accents (${Object.keys(ac.by_l1).length} languages)`, f2(ac.frozen.r), f2(ac.finetuned.r), true)}
+    <details><summary>By first language</summary>
+      ${Object.entries(ac.by_l1).map(([k, v], i, a) => row(esc(k), f2(v.frozen), f2(v.finetuned), i === a.length - 1)).join("")}
+      <p style="margin:6px 0 0">${esc(ac.note)} Licence: ${esc(c.license)}.</p>
+    </details>`;
+  box.classList.remove("hidden");
+}
+async function logout() {
+  if (syncTimer) { clearTimeout(syncTimer); await pushProgress(); }  // flush unsaved progress first
+  await api("/api/logout", {}); me = null; setSignedIn(false); renderAcct();
+  // the history is safe in the account; don't leave it for the next person on this browser
+  store.set("pc-attempts", []); store.set("pc-pairs", {}); setSyncNote();
+  if (!$("view-progress").classList.contains("hidden")) renderProgress(); $("settings").classList.add("hidden"); toast("Logged out. Your progress is saved in your account.");
+  await loadProfile(settings.l1);
+}
+async function deleteAccount() {
+  const r = await api("/api/account/delete", {});
+  if (!r.ok) { toast(r.error || "Couldn't delete the account."); return; }
+  me = null; setSignedIn(false); store.set("pc-has-account", false); renderAcct(); $("settings").classList.add("hidden"); toast("Your account has been deleted");
+}
+async function initAccount() {
+  try { const r = await api("/api/me"); me = r.user || null; l1prof = r.profile || null; } catch (e) { me = null; }
+  setSignedIn(me); renderAcct(); setSyncNote();
+  if (me) { closeAuth(); syncProgress(); }  // the early gate opened before we knew the session was still valid
+  if (me && !me.l1 && settings.l1) {  // a guest choice from before signing up
+    const r = await api("/api/profile", { l1: settings.l1 }); if (r.ok) { me = r.user; l1prof = r.profile; }
+  }
+  if (!l1prof && currentL1()) await loadProfile(currentL1()); else applyProfile();
+  if (me && !me.l1) openLang(true);
+  else authGate();
+}
+
 // ---------------- installable app (PWA) ----------------
 let installEvt = null;
 addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; });
@@ -1534,10 +1885,27 @@ if (window.CoachApp) {  // inside the Android app: let the user point it at a ne
 if ("serviceWorker" in navigator && !NATIVE_TTS) navigator.serviceWorker.register("/sw.js").catch(() => {});
 
 // ---------------- boot ----------------
+// A hosted server scales to zero; the first request wakes it (~30 s). Keep trying
+// for up to 2 minutes and say what's happening instead of showing "Offline".
+async function fetchInfo() {
+  const t0 = Date.now();
+  for (let i = 0; ; i++) {
+    const slow = setTimeout(() => { $("badgeText").textContent = "Waking up the coach…"; }, 2500);
+    try {
+      const r = await fetch("/api/info");
+      if (r.ok) return await r.json();
+    } catch (e) {} finally { clearTimeout(slow); }
+    if (Date.now() - t0 > 120000) throw new Error("server unavailable");
+    $("badge").classList.add("off");
+    $("badgeText").textContent = "Waking up the coach…";
+    await new Promise(res => setTimeout(res, Math.min(2000 + i * 1000, 6000)));
+  }
+}
 (async function boot() {
   renderChips(); onCompose(); goStep(1); setRec("idle");
+  if (!store.get("pc-signed-in", false)) authGate();  // don't wait for a cold server to wake up
   try {
-    info = await (await fetch("/api/info")).json();
+    info = await fetchInfo();
     $("badge").classList.remove("off"); $("badgeText").textContent = info.hosted ? "Online" : "Running on this computer";
     if (info.teacher) {
       coachName = info.teacher.name || "Maya";
@@ -1551,8 +1919,8 @@ if ("serviceWorker" in navigator && !NATIVE_TTS) navigator.serviceWorker.registe
     }
     const m = info.metrics;
     $("tR").textContent = "r = " + m.pearson.toFixed(2);
-    renderTrust();
-    $("footText").textContent = "Scores come from a frozen speech model and a small scorer trained on expert ratings. Treat them as a practice guide, not a verdict. " +
+    renderTrust(); renderModelCard();
+    $("footText").textContent = "Scores come from a speech model and a small scorer trained on expert ratings. Treat them as a practice guide, not a verdict. " +
       (info.hosted ? "Your recording is sent to the server only to score it, and isn't stored." : "Scoring runs on this computer.") +
       (info.teacher && info.teacher.text !== "template" ? " Spoken feedback uses an external AI service, which receives your sentence and scores (never your recording)." : "");
     if (info.examples && info.examples.length) {
@@ -1570,6 +1938,7 @@ if ("serviceWorker" in navigator && !NATIVE_TTS) navigator.serviceWorker.registe
   } catch (e) {
     $("badgeText").textContent = "Offline";
   }
+  await initAccount();
 })();
 </script>
 </body>

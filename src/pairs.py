@@ -21,6 +21,12 @@ PAIR_SETS = [
     {"id": "z-s", "title": "Z vs S", "sound": "Z", "pairs": [("zip", "sip"), ("prize", "price"), ("buzz", "bus"), ("eyes", "ice"), ("zoo", "sue")]},
     {"id": "final-dt", "title": "Final D vs T", "sound": "D", "pairs": [("bad", "bat"), ("ride", "write"), ("card", "cart"), ("seed", "seat"), ("bed", "bet")]},
     {"id": "uh-uw", "title": "Full vs fool", "sound": "UH", "pairs": [("full", "fool"), ("pull", "pool"), ("look", "Luke"), ("could", "cooed"), ("should", "shooed")]},
+    # added for first-language profiles (src/l1_profiles.py); not in the synthetic-voice calibration
+    {"id": "p-b", "title": "P vs B", "sound": "P", "pairs": [("park", "bark"), ("pin", "bin"), ("pear", "bear"), ("pull", "bull"), ("cap", "cab")]},
+    {"id": "f-p", "title": "F vs P", "sound": "F", "pairs": [("fan", "pan"), ("fine", "pine"), ("fork", "pork"), ("coffee", "copy"), ("leaf", "leap")]},
+    {"id": "ch-sh", "title": "CH vs SH", "sound": "CH", "pairs": [("chip", "ship"), ("chair", "share"), ("cheap", "sheep"), ("watch", "wash"), ("match", "mash")]},
+    {"id": "jh-ch", "title": "J vs CH", "sound": "JH", "pairs": [("jeep", "cheap"), ("joke", "choke"), ("jar", "char"), ("ridge", "rich"), ("badge", "batch")]},
+    {"id": "y-jh", "title": "Y vs J", "sound": "Y", "pairs": [("yes", "Jess"), ("yet", "jet"), ("yell", "jell"), ("yolk", "joke"), ("year", "jeer")]},
 ]
 
 
