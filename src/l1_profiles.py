@@ -41,6 +41,17 @@ SOUND_NAMES = {"TH": "th (think)", "DH": "th (this)", "R": "r", "L": "l", "V": "
                "K": "k", "G": "g", "N": "n", "M": "m", "HH": "h", "Y": "y", "EY": "ay (day)",
                "AY": "eye (my)", "AW": "ow (now)", "OY": "oy (boy)", "(dropped)": "left out"}
 
+# Example words for headings, where the bare letter is ambiguous ("z" -> "z (zoo)")
+EXAMPLE_WORDS = {"R": "red", "L": "light", "V": "van", "W": "wet", "Z": "zoo", "S": "see", "D": "day",
+                 "T": "tea", "NG": "sing", "CH": "chair", "SH": "she", "P": "pen", "B": "bed", "F": "fan",
+                 "K": "key", "G": "go", "N": "no", "M": "me", "HH": "hat", "Y": "yes"}
+
+
+def sound_label(arpa):
+    name = SOUND_NAMES.get(arpa, arpa.lower())
+    return f"{name} ({EXAMPLE_WORDS[arpa]})" if arpa in EXAMPLE_WORDS and "(" not in name else name
+
+
 LANGUAGES = [
     # code, label, L2-ARCTIC name (measured) or None, hand-picked focus sounds for "described" ones,
     # and optional short notes (only where the pattern is well established)
@@ -123,7 +134,7 @@ def profile(code):
     measured = bool(lang["data"] and lang["data"] in _load_stats())
     focus = []
     for b, st in _focus_sounds(lang):
-        item = {"sound": b, "name": SOUND_NAMES.get(b, b.lower()), "note": lang["notes"].get(b),
+        item = {"sound": b, "name": SOUND_NAMES.get(b, b.lower()), "label": sound_label(b), "note": lang["notes"].get(b),
                 "tip": get_tip(b).replace(" -- ", "; "), "lesson": SOUND_LESSON.get(b),
                 "pairs": SOUND_PAIRS.get(b, [])}
         if st:

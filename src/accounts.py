@@ -3,7 +3,11 @@
 Storage is pluggable via the ACCOUNTS_STORE environment variable:
   (unset)                      a JSON file at data/accounts.json (local app)
   /some/path.json              a JSON file at that path
-  modal-dict:<name>            a modal.Dict (hosted on Modal; shared by all containers)
+  dir:/some/dir                one JSON file per user in that directory
+  modal-volume:<name>:/mount   one file per user on a mounted, writable Modal Volume
+                               (hosted; durable, committed after every write)
+  modal-dict:<name>            a modal.Dict (legacy: entries expire after 7 idle days,
+                               so don't use it for accounts)
 
 Passwords are hashed with scrypt (stdlib hashlib) and a random per-user salt;
 plain passwords are never stored or logged. Sessions are stateless signed
@@ -69,6 +73,64 @@ class FileStore:
                     json.dump(d, f)
 
 
+class DirStore:
+    """One JSON file per key, named by a hash of the key (so emails never become paths).
+
+    With a Modal Volume, `volume.commit()` makes each write durable and visible to
+    other containers, and `volume.reload()` (at most every `reload_every` s) picks
+    up their writes."""
+
+    def __init__(self, path, volume=None, reload_every=2.0):
+        self.path = path
+        self.volume = volume
+        self.reload_every = reload_every
+        self._last_reload = 0.0
+        self.lock = threading.Lock()
+        os.makedirs(path, exist_ok=True)
+
+    def _file(self, key):
+        return os.path.join(self.path, hashlib.sha256(key.encode("utf-8")).hexdigest()[:40] + ".json")
+
+    def _refresh(self, force=False):
+        if self.volume is not None and (force or time.time() - self._last_reload > self.reload_every):
+            try:
+                self.volume.reload()
+            except Exception as e:  # e.g. a file briefly open in this container
+                print(f"[accounts] volume reload skipped: {e}")
+            self._last_reload = time.time()
+
+    def _commit(self):
+        if self.volume is not None:
+            self.volume.commit()
+
+    def get(self, key):
+        with self.lock:
+            self._refresh()
+            try:
+                with open(self._file(key), encoding="utf-8") as f:
+                    return json.load(f)
+            except (FileNotFoundError, ValueError):
+                return None
+
+    def put(self, key, value):
+        with self.lock:
+            path = self._file(key)
+            tmp = path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(value, f)
+            os.replace(tmp, path)
+            self._commit()
+
+    def delete(self, key):
+        with self.lock:
+            self._refresh(force=True)
+            try:
+                os.remove(self._file(key))
+            except FileNotFoundError:
+                return
+            self._commit()
+
+
 class ModalDictStore:
     def __init__(self, name):
         import modal
@@ -93,6 +155,12 @@ def store():
         spec = os.environ.get("ACCOUNTS_STORE", "")
         if spec.startswith("modal-dict:"):
             _store = ModalDictStore(spec.split(":", 1)[1])
+        elif spec.startswith("modal-volume:"):
+            import modal
+            _, name, mount = spec.split(":", 2)
+            _store = DirStore(os.path.join(mount, "accounts"), volume=modal.Volume.from_name(name))
+        elif spec.startswith("dir:"):
+            _store = DirStore(spec.split(":", 1)[1])
         else:
             _store = FileStore(spec or os.path.join(DATA_DIR, "accounts.json"))
     return _store
@@ -194,7 +262,39 @@ def update_profile(email, **fields):
 
 
 def delete_user(email):
-    store().delete(_key(normalize_email(email)))
+    email = normalize_email(email)
+    store().delete(_key(email))
+    store().delete(_progress_key(email))
+
+
+# ---------------------------------------------------------------- progress
+# Practice history (sentences, scores, per-sound averages; never audio) and
+# minimal-pair tallies, synced so they follow the account across devices.
+
+PROGRESS_MAX_BYTES = 400_000
+PROGRESS_MAX_ATTEMPTS = 500
+
+
+def _progress_key(email):
+    return "progress:" + email
+
+
+def get_progress(email):
+    return store().get(_progress_key(normalize_email(email))) or {"attempts": [], "pairs": {}, "updated": 0}
+
+
+def put_progress(email, attempts, pairs):
+    if not isinstance(attempts, list) or not isinstance(pairs, dict):
+        raise AccountError("Couldn't save your progress.")
+    attempts = [a for a in attempts if isinstance(a, dict) and isinstance(a.get("t"), (int, float))]
+    attempts = sorted(attempts, key=lambda a: a["t"])[-PROGRESS_MAX_ATTEMPTS:]
+    pairs = {str(k)[:40]: {"ok": int(v.get("ok", 0)), "n": int(v.get("n", 0))}
+             for k, v in list(pairs.items())[:100] if isinstance(v, dict)}
+    data = {"attempts": attempts, "pairs": pairs, "updated": int(time.time())}
+    while len(json.dumps(data)) > PROGRESS_MAX_BYTES and data["attempts"]:
+        data["attempts"] = data["attempts"][len(data["attempts"]) // 4 + 1:]  # drop the oldest quarter
+    store().put(_progress_key(normalize_email(email)), data)
+    return data
 
 
 # ---------------------------------------------------------------- sessions

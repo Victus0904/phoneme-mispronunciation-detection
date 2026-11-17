@@ -9,7 +9,8 @@ Model: the multi-accent fine-tuned acoustic model (runs/ft_l2/best, CC BY-NC
 heads, strictness thresholds and pair calibration from local runs/ft_l2/.
 Set WEB_MODEL=frozen to deploy the original frozen model instead.
 
-Accounts: stored in the modal.Dict "pmd-accounts"; sessions are signed with
+Accounts: one JSON file per user on the writable Modal Volume "pmd-accounts"
+(durable; committed after every write, so both containers see it). Sessions are signed with
 SESSION_SECRET from the Modal Secret "pmd-session" (create it once:
 modal secret create pmd-session SESSION_SECRET=<random hex>).
 
@@ -34,6 +35,7 @@ APP_DIR = "/app"
 RUN = os.environ.get("WEB_RUN", "ft_l2")
 FROZEN = os.environ.get("WEB_MODEL") == "frozen"
 vol = modal.Volume.from_name("pmd-ft")
+accounts_vol = modal.Volume.from_name("pmd-accounts", create_if_missing=True)
 
 image = (
     modal.Image.debian_slim(python_version="3.13")
@@ -55,7 +57,7 @@ image = (
     .add_local_dir(os.path.join(ROOT, "models"), f"{APP_DIR}/models")
     .add_local_dir(os.path.join(ROOT, "examples"), f"{APP_DIR}/examples")
 )
-model_env = {"ACCOUNTS_STORE": "modal-dict:pmd-accounts"}
+model_env = {"ACCOUNTS_STORE": "modal-volume:pmd-accounts:/accounts"}
 if not FROZEN:
     # matching heads for the fine-tuned model (small files; the 1.3 GB model stays on the volume)
     image = image.add_local_dir(os.path.join(ROOT, "runs", RUN), f"{APP_DIR}/models_ft",
@@ -69,7 +71,7 @@ if os.environ.get("COACH_KEYS") == "1":
 
 
 @app.function(cpu=2, memory=6144, min_containers=0, max_containers=2, scaledown_window=300,
-              timeout=120, secrets=secrets, volumes={} if FROZEN else {"/vol": vol.read_only()})
+              timeout=120, secrets=secrets, volumes={"/accounts": accounts_vol, **({} if FROZEN else {"/vol": vol.read_only()})})
 @modal.concurrent(max_inputs=8)
 @modal.asgi_app()
 def web():

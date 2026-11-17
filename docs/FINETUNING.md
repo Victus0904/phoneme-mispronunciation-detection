@@ -191,6 +191,6 @@ volume read-only for the model and uploads the matching heads from
 `scripts/synth_pairs.ps1` + `scripts/check_pairs.py` +
 `scripts/fit_pairs_calibration.py`: 79.7% correct / 12.9% unsure / 7.4% wrong
 on synthetic voices, vs 82.0 / 12.0 / 6.0 for the frozen model). Accounts
-live in the Modal Dict `pmd-accounts`; the session key is the Modal Secret
-`pmd-session`. `WEB_MODEL=frozen modal deploy scripts/modal_web.py` rolls
+live on the Modal Volume `pmd-accounts` (one file per user, named by a hash
+of the email); the session key is the Modal Secret `pmd-session`. `WEB_MODEL=frozen modal deploy scripts/modal_web.py` rolls
 back to the frozen model.

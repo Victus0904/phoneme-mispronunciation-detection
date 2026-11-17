@@ -69,6 +69,26 @@ class AccountsTest(unittest.TestCase):
         self.assertIsNone(accounts.get_user("ana@example.com"))
         self.assertEqual(self.c.post("/api/login", json={"email": "ana@example.com", "password": "correct horse"}).status_code, 401)
 
+    def test_progress_sync_follows_the_account(self):
+        self.assertEqual(self.c.get("/api/progress").status_code, 401)
+        self.c.post("/api/signup", json={"email": "sync@example.com", "password": "correct horse"})
+        p = self.c.get("/api/progress").json()
+        self.assertEqual((p["attempts"], p["pairs"]), ([], {}))
+        attempts = [{"t": 1700000000000 + i, "s": f"sentence {i}", "score": 80} for i in range(600)]
+        r = self.c.post("/api/progress", json={"attempts": attempts + ["junk", {"no_t": 1}],
+                                               "pairs": {"ship_sheep": {"ok": 3, "n": 5}}})
+        self.assertTrue(r.json()["ok"], r.text)
+        self.assertEqual(r.json()["n"], accounts.PROGRESS_MAX_ATTEMPTS)  # newest 500, junk dropped
+        # a second device (fresh cookie jar) sees the same history after logging in
+        other = TestClient(server.app)
+        other.post("/api/login", json={"email": "sync@example.com", "password": "correct horse"})
+        p = other.get("/api/progress").json()
+        self.assertEqual(p["attempts"][-1]["s"], "sentence 599")
+        self.assertEqual(p["pairs"]["ship_sheep"], {"ok": 3, "n": 5})
+        self.assertEqual(self.c.post("/api/progress", json={"attempts": "nope"}).status_code, 400)
+        self.c.post("/api/account/delete")
+        self.assertEqual(accounts.get_progress("sync@example.com")["attempts"], [])  # deleted with the account
+
     def test_signup_validation(self):
         self.assertEqual(self.c.post("/api/signup", json={"email": "not-an-email", "password": "longenough"}).status_code, 400)
         self.assertEqual(self.c.post("/api/signup", json={"email": "a@b.co", "password": "short"}).status_code, 400)
@@ -124,6 +144,36 @@ class AccountsTest(unittest.TestCase):
         dh = j["words"][0]["phones"][0]
         self.assertEqual(dh["arpa"], "DH")
         self.assertIn("Spanish", dh.get("l1_note", ""))
+
+
+class DirStoreTest(unittest.TestCase):
+    """The hosted store: one file per user, committed to the volume after each write."""
+
+    class FakeVolume:
+        def __init__(self):
+            self.commits = self.reloads = 0
+
+        def commit(self):
+            self.commits += 1
+
+        def reload(self):
+            self.reloads += 1
+
+    def test_roundtrip_commit_and_no_emails_in_paths(self):
+        with tempfile.TemporaryDirectory() as d:
+            vol = self.FakeVolume()
+            st = accounts.DirStore(d, volume=vol, reload_every=0)
+            self.assertIsNone(st.get("a@example.com"))
+            st.put("a@example.com", {"email": "a@example.com", "l1": "es"})
+            self.assertEqual(vol.commits, 1)
+            self.assertEqual(st.get("a@example.com")["l1"], "es")
+            self.assertGreaterEqual(vol.reloads, 2)
+            self.assertFalse(any("example" in f for f in os.listdir(d)))
+            st.delete("a@example.com")
+            self.assertIsNone(st.get("a@example.com"))
+            self.assertEqual(vol.commits, 2)
+            st.delete("a@example.com")  # deleting twice is harmless
+            self.assertEqual(vol.commits, 2)
 
 
 if __name__ == "__main__":

@@ -45,7 +45,7 @@ MAX_SENTENCE_CHARS = 200
 
 # simple per-visitor rate limits (requests per minute), so one visitor can't
 # monopolise this machine or burn through the free API quotas
-LIMITS = {"score": 20, "feedback": 12, "phonemes": 60, "ask": 10, "pair": 30, "auth": 10}
+LIMITS = {"score": 20, "feedback": 12, "phonemes": 60, "ask": 10, "pair": 30, "auth": 10, "progress": 40}
 _hits = collections.defaultdict(collections.deque)
 
 
@@ -280,6 +280,28 @@ def update_profile(request: Request, body: dict = Body(...)):
         fields["name"] = str(body["name"] or "").strip()[:60]
     u = accounts.update_profile(u["email"], **fields)
     return {"ok": True, "user": accounts.public(u), "profile": l1_profiles.profile(u["l1"]) if u.get("l1") else None}
+
+
+@app.get("/api/progress")
+def get_progress(request: Request):
+    u = current_user(request)
+    if u is None:
+        return JSONResponse({"ok": False, "error": "Please log in."}, status_code=401)
+    return {"ok": True, **accounts.get_progress(u["email"])}
+
+
+@app.post("/api/progress")
+def put_progress(request: Request, body: dict = Body(...)):
+    u = current_user(request)
+    if u is None:
+        return JSONResponse({"ok": False, "error": "Please log in."}, status_code=401)
+    if _limited(request, "progress"):
+        return JSONResponse({"ok": False, "error": "Too many saves; try again in a minute."}, status_code=429)
+    try:
+        data = accounts.put_progress(u["email"], body.get("attempts", []), body.get("pairs", {}))
+    except (accounts.AccountError, TypeError, ValueError):
+        return JSONResponse({"ok": False, "error": "Couldn't save your progress."}, status_code=400)
+    return {"ok": True, "updated": data["updated"], "n": len(data["attempts"])}
 
 
 @app.post("/api/account/delete")

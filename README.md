@@ -89,7 +89,8 @@ Then:
    word from your recording.
 
 Scoring runs on your machine and recordings are never stored. Your recent
-attempts are saved in your browser only. If you add LLM keys, the coach
+attempts are saved in your browser, and in your account if you sign up
+(sentences and scores, never recordings). If you add LLM keys, the coach
 sends your sentence and scores (never your recording) to that service, and
 questions you *speak* to Maya are transcribed by Groq.
 
@@ -114,8 +115,11 @@ What else is in the app:
   and Vietnamese the focus sounds come from what speakers of that language
   were actually marked wrong on in L2-ARCTIC (`models/l1_stats.json`);
   German, French, Japanese, Portuguese and Russian use commonly described
-  patterns and are labelled as such. Accounts store only email, name, a
-  scrypt password hash and the language (`src/accounts.py`).
+  patterns and are labelled as such. Accounts store email, name, a scrypt
+  password hash, the language and the practice history, so progress follows
+  you across devices (`src/accounts.py`; on Modal, one file per user on the
+  `pmd-accounts` volume). Logging out clears the history from that browser;
+  deleting the account deletes everything.
 - **Multi-accent model (optional).** `docs/FINETUNING.md` fine-tunes the
   acoustic model on speechocean762 + L2-ARCTIC: test r 0.753 → 0.798, and
   much better on held-out speakers of six other first languages. The hosted
