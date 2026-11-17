@@ -81,9 +81,14 @@ def _sh(cmd, env=None):
 def train(name: str = "ft_top8", extra: str = ""):
     _link(name)
     _sh("nvidia-smi --query-gpu=name,memory.total --format=csv")
+    import torch
+    big = torch.cuda.get_device_properties(0).total_memory > 20 * 2**30
+    # 24 GB cards (L4, A10G): batch 8, no checkpointing. 16 GB (T4): batch 4 with
+    # checkpointing -- L2-ARCTIC's longer sentences ran a T4 out of memory at batch 8.
+    # Same effective batch (accum = 8 // batch) either way.
+    mem = "--batch 8 --no-checkpointing" if big else "--batch 4"
     # --max-hours stops cleanly (and checkpoints) before the hard timeout
-    _sh(f"python scripts/finetune_acoustic.py --out runs/{name} --batch 8 --workers 4 "
-        f"--no-checkpointing --max-hours 5 {extra}")
+    _sh(f"python scripts/finetune_acoustic.py --out runs/{name} {mem} --workers 4 --max-hours 5 {extra}")
 
 
 @app.function(gpu=GPU, cpu=8, memory=32768, volumes={VOL: vol}, timeout=4 * 3600)
@@ -95,7 +100,10 @@ def rebuild(name: str = "ft_top8"):
     if not os.path.isdir(best):
         raise SystemExit(f"{best} missing: fine-tuning never beat the frozen baseline, nothing to rebuild")
     env = {"ACOUSTIC_MODEL": best}
-    for step in ("scripts/extract_full.py", "scripts/build_features_v2.py", "scripts/train_v2.py",
+    # same order as README "Reproducing the results"; cv_v2 writes the train OOF
+    # predictions that train_v2 and calibrate_strictness pick thresholds from
+    for step in ("scripts/extract_full.py", "scripts/build_features_v2.py",
+                 "scripts/cv_v2.py gbm_vec_h16 seq_vec_h16_s0 seq_vec_h16_s1", "scripts/train_v2.py",
                  "scripts/calibrate_strictness.py", "scripts/build_utt_features.py", "scripts/train_fluency.py"):
         _sh(f"python {step}", env)
     out = f"{VOL}/results/{name}"
@@ -143,3 +151,11 @@ def prep_l2arctic():
         print(f"{spk}: {len(ann)} annotated utterances", flush=True)
     out = os.path.join(REPO, L2_PARQUET)
     _sh(f"python scripts/l2arctic.py pack {raw} {out}")
+
+
+@app.function(gpu=GPU, cpu=4, memory=16384, volumes={VOL: vol}, timeout=2 * 3600)
+def eval_accents(models: str = "base,runs/ft_top8/best,runs/ft_l2/best"):
+    """Per-accent GOP-SF evaluation on L2-ARCTIC's held-out test speakers
+    (scripts/eval_accents.py). Summary lands in runs/accents_summary.json."""
+    _link("eval")
+    _sh("python scripts/eval_accents.py " + " ".join(models.split(",")))

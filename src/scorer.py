@@ -25,9 +25,13 @@ from src.text import text_to_words
 from src.tips import get_example, get_tip
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_BUNDLE = os.path.join(ROOT, "models", "head_v2.joblib")
-UTT_BUNDLE = os.path.join(ROOT, "models", "utt_v2.joblib")
-STRICTNESS_FILE = os.path.join(ROOT, "models", "strictness.json")
+# MODELS_DIR selects a whole set of heads trained on one acoustic model's
+# features (head_v2.joblib, utt_v2.joblib, strictness.json), e.g. the output
+# of scripts/modal_app.py::rebuild. Pair it with ACOUSTIC_MODEL (src/acoustic.py).
+MODELS_DIR = os.environ.get("MODELS_DIR", os.path.join(ROOT, "models"))
+DEFAULT_BUNDLE = os.path.join(MODELS_DIR, "head_v2.joblib")
+UTT_BUNDLE = os.path.join(MODELS_DIR, "utt_v2.joblib")
+STRICTNESS_FILE = os.path.join(MODELS_DIR, "strictness.json")
 TARGET_SR = 16000
 MAX_AUDIO_SECONDS = 20.0
 SILENCE_RMS_THRESHOLD = 1e-4

@@ -3,35 +3,94 @@
 v2 keeps `facebook/wav2vec2-lv-60-espeak-cv-ft` frozen. This is the optional
 next step: fine-tune its top layers so the phone posteriors (and therefore
 GOP-SF, the strongest feature) separate correct from mispronounced phones
-better, then rebuild the scoring head on top.
+better, then rebuild the scoring head on top. Optionally, add L2-ARCTIC for
+five more first languages.
 
-**Status: experimental.** The script runs end to end and its GOP-SF matches
-`src/features_v2.gop_sf` to within 4e-6 on the frozen model, but no full run
-has been done yet, so it is not known whether it beats v2's test r = 0.753.
+**Status: experimental.** First full run (speechocean762 only, Modal A10G,
+early-stopped after 9 epochs): GOP-SF-only validation r went from **0.454
+(frozen) to 0.618**. Whether the full v2 pipeline beats its test
+r = 0.753 is measured by the rebuild step below.
 
 ## What it trains
 
 `scripts/finetune_acoustic.py`, loss per batch:
 
-- **CTC on what the speaker actually said**: the canonical phones with
-  speechocean762's annotated mispronunciations applied (substitutions,
-  deletions, multi-phone insertions; `X*` distorted phones count as X).
-  Utterances whose annotation is `<unk>` (about 8%) get no CTC term. This
-  keeps the model a calibrated phone recognizer.
+- **CTC on what the speaker actually said**: the canonical phones with the
+  annotated mispronunciations applied (substitutions, deletions, multi-phone
+  insertions; `X*` distorted phones count as X). Utterances with an
+  unidentifiable error (`<unk>`, about 8% of speechocean762) get no CTC
+  term. This keeps the model a calibrated phone recognizer.
 - **GOP-SF score loss**: GOP-SF computed exactly as in `src/features_v2.py`
-  but differentiable, mapped to a 0–2 score by a 4-parameter head, regressed
-  onto the human phone scores. Phones the raters marked wrong are weighted
-  4× (`--err-weight`), since 81% of phones score 2.0.
+  (checked to within 4e-6) but differentiable, mapped to a 0–2 score by a
+  4-parameter head, regressed onto the human phone scores. Phones the raters
+  marked wrong are weighted 4× (`--err-weight`).
 
 Only the top `--unfreeze` layers (default 8, i.e. layers 16–23) plus the
 final layer norm and CTC head train. With the default, the layer-8 and
 layer-16 hidden states the head uses do not change.
 
-**Evaluation discipline is unchanged.** The script never reads the test
-split. It selects the checkpoint on a speaker-disjoint validation set
-(10% of *train* speakers, fixed seed), and first reports the frozen model
-on that same set, so every number in `log.json` is comparable to the
-baseline. Test is scored once, afterwards, by `scripts/train_v2.py`.
+**Evaluation discipline is unchanged.** The script never reads a test split.
+It selects the checkpoint on speaker-disjoint validation sets (10% of
+speechocean762 *train* speakers, plus L2-ARCTIC's validation speakers when
+used), and first reports the frozen model on the same sets, so every number
+in `log.json` is comparable to the baseline. The speechocean762 test split is
+scored once, afterwards, by `scripts/train_v2.py`.
+
+## Adding accents: L2-ARCTIC
+
+L2-ARCTIC v5.0 (Zhao et al., 2018) is **CC BY-NC 4.0, non-commercial use
+only**. It has 24 speakers: four each with L1 Arabic, Mandarin, Hindi,
+Korean, Spanish and Vietnamese. Its 3,599 hand-annotated utterances mark
+each phone as correct, substituted, deleted or inserted. There are no graded
+scores, so phones become 2 (correct), 0 (wrong) or 1 (distorted version of
+itself).
+
+`scripts/l2arctic.py` converts the annotation TextGrids into speechocean762's
+row format (3,552 utterances kept, 14.7% of phones marked wrong). The split
+is fixed per L1: two speakers train, one validates, and one is held out as
+test and never read by training, so each accent can be measured later.
+
+```
+python scripts/l2arctic.py inspect <l2arctic_root>   # label stats only
+python scripts/l2arctic.py pack <l2arctic_root>      # -> datasets/l2arctic/l2arctic_annotated.parquet
+python scripts/finetune_acoustic.py --l2arctic datasets/l2arctic/l2arctic_annotated.parquet ...
+```
+
+With `--l2arctic`, validation reports r per set and per L1. The checkpoint is
+selected on the mean r across the two sets, so gains on new accents can't
+hide a speechocean regression.
+
+## Running it on Modal (what we use)
+
+`scripts/modal_app.py` runs everything on Modal GPUs. A volume `pmd-ft`
+holds the datasets, checkpoints (`runs/<name>`, so runs resume), per-run
+feature caches and results. GPUs are tried in the order L4, A10G, T4.
+
+```
+pip install modal && modal setup
+modal run scripts/modal_app.py::prep_l2arctic                  # once, CPU only (~$0.10)
+modal run scripts/modal_app.py::train --name smoke --extra "--limit 160 --epochs 1"
+modal run --detach scripts/modal_app.py::train --name ft_top8
+modal run --detach scripts/modal_app.py::train --name ft_l2 --extra "--l2arctic datasets/l2arctic/l2arctic_annotated.parquet"
+modal run --detach scripts/modal_app.py::rebuild --name ft_top8   # one-time test evaluation
+modal volume get pmd-ft results/ft_top8 ./runs/
+```
+
+`rebuild` runs the README's reproduction steps with `ACOUSTIC_MODEL` set to
+the fine-tuned model (`extract_full`, `build_features_v2`, `cv_v2`,
+`train_v2`, `calibrate_strictness`, fluency heads). It copies the new heads,
+strictness thresholds, metrics and figures to `results/<name>/`.
+`extract_full.py` records the model in `cache/v2/utt/MODEL.txt` and refuses
+to mix models in one cache.
+
+**Spend guard:** `python scripts/modal_budget.py` checks this month's Modal
+spend every 5 minutes, logs it to `runs/modal_credits.log`, and stops every
+app at `--limit` (default $25, leaving $5 of the $30 monthly credits).
+Modal's report can lag by up to about an hour, so also set a spending limit
+in the Modal dashboard as a backstop.
+
+Measured: on an A10G, about 26 utterances/s, 1.5 min per speechocean762
+epoch, and about $1.10/hour with the CPUs and memory requested.
 
 ## Running it locally (GTX 1650 4 GB and up)
 
@@ -42,51 +101,17 @@ E:\venvs\pmd-gpu\Scripts\pip install -r requirements-finetune.txt
 E:\venvs\pmd-gpu\Scripts\python scripts\finetune_acoustic.py --limit 160 --epochs 2 --out runs\smoke
 ```
 
-Measured on a GTX 1650 with the defaults (`--batch 2`, top 8 layers): about
-0.5 utterances/s, so one epoch over the ~2,250 training utterances takes
-about 75 minutes, and 10 epochs is an overnight job. Use the cloud for real runs.
+Measured on a GTX 1650 with the defaults (`--batch 2`): about 0.5
+utterances/s, about 75 minutes per epoch. That's fine for debugging, too
+slow for real runs.
 
 fp16 note: the model's positional convolution overflows in fp16 on real
 speech, so the script keeps it (and the frozen CNN front end) in fp32 under
 autocast. On GPUs with bf16 (L4, A10G, A100) the script uses bf16 instead.
 
-## Running it on Lightning AI
-
-1. Create a Studio, pick a GPU. An **L4 (24 GB)** is a good default; a T4
-   works with `--batch 4`. Check the hourly credit cost shown for each GPU.
-2. In the Studio terminal:
-   ```
-   git clone https://github.com/Victus0904/phoneme-mispronunciation-detection.git
-   cd phoneme-mispronunciation-detection
-   git checkout finetune-acoustic          # until it is merged
-   bash scripts/lightning_setup.sh
-   ```
-3. Measure speed first (2 minutes), then train with a time cap so a mistake
-   can't burn the whole budget. Rerunning the same command resumes from
-   `last.pt`:
-   ```
-   python scripts/finetune_acoustic.py --limit 160 --epochs 1 --batch 8 --workers 4 --no-checkpointing --out runs/smoke
-   python scripts/finetune_acoustic.py --batch 8 --workers 4 --no-checkpointing --max-hours 3 --out runs/ft_top8
-   ```
-   If the 24 GB card runs out of memory, drop `--no-checkpointing` or use `--batch 4`.
-4. Read `runs/ft_top8/log.json`: `baseline_frozen.r` vs. each epoch's `r`.
-   If no epoch beat the baseline, the script saves no `best/`. Stop there
-   and try other settings (`--unfreeze 4`, `--lr 1e-5`, `--gop-weight 2`)
-   rather than going on to the test split.
-5. If it did improve, rebuild the v2 pipeline on the new model. This is the
-   one-time test evaluation:
-   ```
-   export ACOUSTIC_MODEL=runs/ft_top8/best
-   python scripts/extract_full.py
-   python scripts/build_features_v2.py
-   python scripts/train_v2.py                 # prints test r / AP; compare with 0.753 / 0.642
-   python scripts/calibrate_strictness.py
-   python scripts/build_utt_features.py && python scripts/train_fluency.py
-   ```
-   `extract_full.py` writes `cache/v2/utt/MODEL.txt` and refuses to mix
-   models in one cache.
-6. Download `runs/ft_top8/best/` (about 1.3 GB), `models/` and
-   `cache/v2/metrics_v2.json`. Stop the Studio so it stops using credits.
+Other clouds: `scripts/lightning_setup.sh` sets up any Ubuntu GPU box
+(e.g. Lightning AI). Then run the same commands as `modal_app.py`'s
+functions.
 
 ## Using a fine-tuned model in the app
 
@@ -95,17 +120,18 @@ trained on that model's features (the shipped head expects the frozen model):
 
 ```
 $env:ACOUSTIC_MODEL = "E:\models\ft_top8"   # PowerShell
+$env:HEAD_BUNDLE = "E:\models\ft_top8\head_v2.joblib"
 python server.py
 ```
 
 To ship it, upload the model folder to the Hugging Face Hub (1.3 GB is too
 large for git), point `BASE_MODEL_ID`'s default at it, and commit the new
-`models/*.joblib` and `models/strictness.json` together.
+`models/*.joblib` and `models/strictness.json` together. A model trained
+with `--l2arctic` inherits L2-ARCTIC's non-commercial license.
 
-## Budget
+## Hosting the website on Modal
 
-A full run on an L4-class GPU is estimated at 1–2 hours (10 epochs), plus
-about 30 minutes for step 5. That estimate is from the GTX 1650 benchmark and
-hasn't been measured on an L4. At typical cloud rates, $30 of credits covers
-many full runs. Read the actual rate in Lightning before starting, and keep
-`--max-hours` set.
+`modal deploy scripts/modal_web.py` serves `server.py` + `web/` on Modal
+(CPU, 2 cores / 4 GiB, scales to zero 5 minutes after the last request,
+about $0.13 per running hour, at most 2 containers). The first request
+after an idle spell takes about 30 s while the model loads.
