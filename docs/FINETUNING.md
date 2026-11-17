@@ -20,6 +20,14 @@ once, after training, and every choice was made on validation speakers only.
 | L2-ARCTIC test speakers, AP (GOP-SF only) | 0.323 | 0.295 | **0.555** |
 | Fluency / prosody test r | 0.82 / 0.81 | 0.828 / 0.817 | 0.826 / 0.818 |
 
+![Validation r per epoch and training losses](../figures/finetune_curves.png)
+
+Validation r rises for both sets from the first epoch and is still creeping
+up at epoch 10 (the 10-epoch budget, about 64 minutes on an A10G). The
+dashed lines are the frozen model on the same validation speakers.
+
+![Per-first-language r on held-out speakers](../figures/finetune_accents.png)
+
 Per first language on the L2-ARCTIC test speakers (GOP-SF r, one held-out
 speaker each, so read these as indicative):
 
@@ -42,6 +50,11 @@ Takeaways:
 - The L2-ARCTIC rows measure GOP-SF alone, because the v2 head is trained on
   speechocean762 only. Training the head on L2-ARCTIC too is the next step.
 - `ft_l2` inherits L2-ARCTIC's **non-commercial** license.
+
+`python scripts/finetune_report.py --name ft_l2` draws both figures from
+`runs/ft_l2/log.json` and `runs/accents_summary.json` and writes
+`runs/ft_l2/model_card.json`, which the website shows in "How accurate is
+this?" (served from `MODELS_DIR`).
 
 Cost: about $2.75 on Modal for everything (two training runs, two rebuilds,
 evaluations, data prep), on A10G/T4 GPUs.

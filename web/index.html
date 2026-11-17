@@ -421,6 +421,15 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
 .form-err { margin-top: 12px; color: var(--rec); font-size: 13.5px; min-height: 1em; }
 .linkbtn { border: 0; background: none; color: var(--muted); font-size: 13.5px; text-decoration: underline; padding: 4px; }
 .linkbtn:hover { color: var(--text); }
+.auth-wide { width: 100%; justify-content: center; margin-top: 10px; }
+.auth-or { display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; color: var(--muted); font-size: 12.5px; }
+.auth-or::before, .auth-or::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
+.mcard { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.mcard h5 { margin: 0 0 4px; font-size: 13px; color: var(--text); }
+.mcard .row b .was { color: var(--muted); font-weight: 500; }
+.mcard details { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.mcard details summary { cursor: pointer; }
+.mcard details .row { padding: 4px 0; }
 .langgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 16px; }
 .langgrid button { text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 14.5px; font-weight: 600; }
 .langgrid button small { display: block; font-weight: 500; font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -591,6 +600,7 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
             <div class="row"><span>Flags that are real errors</span><b id="tP">–</b></div>
             <div class="row" style="border-bottom:0"><span>Real errors that get flagged</span><b id="tC">–</b></div>
             <p>Scores are measured by a speech model checked against expert raters on speakers it never trained on (the figures above are for Mandarin-speaking learners). <span id="trustAccents"></span> <span id="trustCoach"></span></p>
+            <div class="mcard hidden" id="mcard"></div>
           </div>
         </div>
       </aside>
@@ -708,12 +718,11 @@ kbd { font: 11px ui-monospace, Consolas, monospace; border: 1px solid var(--bord
       <div class="field"><label for="authEmail">Email</label><input type="email" id="authEmail" autocomplete="email" required></div>
       <div class="field"><label for="authPw">Password</label><input type="password" id="authPw" autocomplete="new-password" minlength="8" required><small id="pwHelp">At least 8 characters.</small></div>
       <div class="form-err" id="authErr" role="alert"></div>
-      <div class="step-actions" style="margin-top:10px">
-        <button type="button" class="linkbtn" id="authGuest">Continue without an account</button>
-        <div class="spacer"></div>
-        <button type="submit" class="btn primary" id="authSubmit">Create account</button>
-      </div>
+      <button type="submit" class="btn primary auth-wide" id="authSubmit">Create account</button>
     </form>
+    <div class="auth-or"><span>or</span></div>
+    <button type="button" class="btn auth-wide" id="authGuest">Continue as guest</button>
+    <p class="note" style="margin:8px 0 0;text-align:center">No account needed to practise. As a guest, your progress stays in this browser only.</p>
   </div>
 </div>
 
@@ -1672,10 +1681,22 @@ function openAuth(mode) {
   $("authModal").classList.remove("hidden");
   setTimeout(() => (up ? $("authName") : $("authEmail")).focus(), 50);
 }
-function closeAuth() { $("authModal").classList.add("hidden"); store.set("pc-onboarded", true); }
+// Welcome gate: every new visit asks visitors who aren't signed in to sign up, log in or
+// continue as a guest. "Guest" lasts for this browser tab session only.
+function guestThisVisit() { try { return sessionStorage.getItem("pc-guest") === "1"; } catch (e) { return false; } }
+function setSignedIn(v) { store.set("pc-signed-in", !!v); if (v) store.set("pc-has-account", true); }
+function closeAuth() { $("authModal").classList.add("hidden"); }
+function continueAsGuest() {
+  try { sessionStorage.setItem("pc-guest", "1"); } catch (e) {}
+  closeAuth(); if (!currentL1()) openLang();
+}
+function authGate() {
+  if (me || guestThisVisit() || !$("authModal").classList.contains("hidden")) return;
+  openAuth(store.get("pc-has-account", false) ? "login" : "signup");
+}
 document.querySelectorAll(".auth-tabs button").forEach(b => b.onclick = () => openAuth(b.dataset.mode));
-$("authClose").onclick = () => { closeAuth(); if (!currentL1()) openLang(); };
-$("authGuest").onclick = () => { closeAuth(); if (!currentL1()) openLang(); };
+$("authClose").onclick = continueAsGuest;
+$("authGuest").onclick = continueAsGuest;
 $("authForm").onsubmit = async (e) => {
   e.preventDefault();
   const email = $("authEmail").value.trim(), password = $("authPw").value;
@@ -1687,7 +1708,7 @@ $("authForm").onsubmit = async (e) => {
   catch (err) { r = { ok: false, error: "Couldn't reach the server. Please try again." }; }
   $("authSubmit").disabled = false;
   if (!r.ok) { $("authErr").textContent = r.error || "Something went wrong."; return; }
-  me = r.user; $("authPw").value = ""; closeAuth(); renderAcct();
+  me = r.user; $("authPw").value = ""; closeAuth(); setSignedIn(true); renderAcct();
   if (me.l1) { await loadProfile(me.l1); toast(`Welcome back${me.name ? ", " + me.name : ""}!`); }
   else openLang(true);
 };
@@ -1732,25 +1753,45 @@ function renderTrustNote() {
     : l1prof && l1prof.code !== "other"
       ? `It hasn't been checked on ${l1prof.label} speakers yet, so treat scores as a rougher guide.`
       : `Checked on held-out speakers of ${measured.join(", ")}.`;
+  renderModelCard();
+}
+function renderModelCard() {
+  const c = info && info.model_card, box = $("mcard");
+  if (!c) { box.classList.add("hidden"); return; }
+  const so = c.speechocean_test, ac = c.accents_test, f2 = v => (+v).toFixed(2), pc = v => Math.round(v * 100) + "%";
+  const row = (label, a, b, last) => `<div class="row"${last ? ' style="border-bottom:0"' : ""}><span>${label}</span><b><span class="was">${a} →</span> ${b}</b></div>`;
+  const mine = l1prof && l1prof.data && ac.by_l1[l1prof.data];
+  box.innerHTML = `<h5>${esc(c.label)}</h5>
+    <p style="margin:0 0 6px">Fine-tuned on two expert-annotated datasets covering ${Object.keys(ac.by_l1).length} first languages. Before → after fine-tuning, on speakers it never trained on:</p>
+    ${row("Agreement with experts", f2(so.frozen.pearson), f2(so.finetuned.pearson))}
+    ${row("Real errors flagged (Standard)", pc(so.frozen.recall), pc(so.finetuned.recall))}
+    ${mine ? row(`${esc(l1prof.label)} speakers`, f2(mine.frozen), f2(mine.finetuned)) : ""}
+    ${row(`Other accents (${Object.keys(ac.by_l1).length} languages)`, f2(ac.frozen.r), f2(ac.finetuned.r), true)}
+    <details><summary>By first language</summary>
+      ${Object.entries(ac.by_l1).map(([k, v], i, a) => row(esc(k), f2(v.frozen), f2(v.finetuned), i === a.length - 1)).join("")}
+      <p style="margin:6px 0 0">${esc(ac.note)} Licence: ${esc(c.license)}.</p>
+    </details>`;
+  box.classList.remove("hidden");
 }
 async function logout() {
-  await api("/api/logout", {}); me = null; renderAcct(); $("settings").classList.add("hidden"); toast("Logged out");
+  await api("/api/logout", {}); me = null; setSignedIn(false); renderAcct(); $("settings").classList.add("hidden"); toast("Logged out");
   await loadProfile(settings.l1);
 }
 async function deleteAccount() {
   const r = await api("/api/account/delete", {});
   if (!r.ok) { toast(r.error || "Couldn't delete the account."); return; }
-  me = null; renderAcct(); $("settings").classList.add("hidden"); toast("Your account has been deleted");
+  me = null; setSignedIn(false); store.set("pc-has-account", false); renderAcct(); $("settings").classList.add("hidden"); toast("Your account has been deleted");
 }
 async function initAccount() {
   try { const r = await api("/api/me"); me = r.user || null; l1prof = r.profile || null; } catch (e) { me = null; }
-  renderAcct();
+  setSignedIn(me); renderAcct();
+  if (me) closeAuth();  // the early gate opened before we knew the session was still valid
   if (me && !me.l1 && settings.l1) {  // a guest choice from before signing up
     const r = await api("/api/profile", { l1: settings.l1 }); if (r.ok) { me = r.user; l1prof = r.profile; }
   }
   if (!l1prof && currentL1()) await loadProfile(currentL1()); else applyProfile();
   if (me && !me.l1) openLang(true);
-  else if (!me && !store.get("pc-onboarded", false)) openAuth("signup");
+  else authGate();
 }
 
 // ---------------- installable app (PWA) ----------------
@@ -1773,6 +1814,7 @@ if ("serviceWorker" in navigator && !NATIVE_TTS) navigator.serviceWorker.registe
 // ---------------- boot ----------------
 (async function boot() {
   renderChips(); onCompose(); goStep(1); setRec("idle");
+  if (!store.get("pc-signed-in", false)) authGate();  // don't wait for a cold server to wake up
   try {
     info = await (await fetch("/api/info")).json();
     $("badge").classList.remove("off"); $("badgeText").textContent = info.hosted ? "Online" : "Running on this computer";
@@ -1788,7 +1830,7 @@ if ("serviceWorker" in navigator && !NATIVE_TTS) navigator.serviceWorker.registe
     }
     const m = info.metrics;
     $("tR").textContent = "r = " + m.pearson.toFixed(2);
-    renderTrust();
+    renderTrust(); renderModelCard();
     $("footText").textContent = "Scores come from a speech model and a small scorer trained on expert ratings. Treat them as a practice guide, not a verdict. " +
       (info.hosted ? "Your recording is sent to the server only to score it, and isn't stored." : "Scoring runs on this computer.") +
       (info.teacher && info.teacher.text !== "template" ? " Spoken feedback uses an external AI service, which receives your sentence and scores (never your recording)." : "");

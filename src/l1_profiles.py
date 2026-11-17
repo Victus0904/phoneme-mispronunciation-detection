@@ -140,7 +140,7 @@ def profile(code):
         for p in f["pairs"]:
             if p not in pairs:
                 pairs.append(p)
-    return {"code": lang["code"], "label": lang["label"], "measured": measured,
+    return {"code": lang["code"], "label": lang["label"], "measured": measured, "data": lang["data"],
             "evidence_label": ("Based on how speakers of this language were rated in a research dataset"
                                if measured else "Based on commonly described patterns; not measured for this language"),
             "focus": focus, "lessons": lessons, "pairs": pairs}

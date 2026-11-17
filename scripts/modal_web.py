@@ -17,8 +17,8 @@ modal secret create pmd-session SESSION_SECRET=<random hex>).
   modal app stop pronunciation-coach     # take it down
 
 Cost: containers scale to zero 5 minutes after the last request, so it
-costs nothing while unused. A running container (2 CPU cores, 4 GiB) costs
-about $0.13/hour at Modal's rates. max_containers caps the worst case. The
+costs nothing while unused. A running container (2 CPU cores, 6 GiB) costs
+about $0.15/hour at Modal's rates. max_containers caps the worst case. The
 first visit after a quiet spell waits about 20-40 s while the model loads.
 
 The voice coach uses its built-in template unless you add LLM keys as a
@@ -68,7 +68,7 @@ if os.environ.get("COACH_KEYS") == "1":
     secrets.append(modal.Secret.from_name("coach-keys"))
 
 
-@app.function(cpu=2, memory=4096, min_containers=0, max_containers=2, scaledown_window=300,
+@app.function(cpu=2, memory=6144, min_containers=0, max_containers=2, scaledown_window=300,
               timeout=120, secrets=secrets, volumes={} if FROZEN else {"/vol": vol.read_only()})
 @modal.concurrent(max_inputs=8)
 @modal.asgi_app()

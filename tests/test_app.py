@@ -48,6 +48,11 @@ class AppTest(unittest.TestCase):
         self.assertEqual(set(info["strictness"]), set(LEVELS))
         recalls = [info["strictness"][k]["recall"] for k in LEVELS]
         self.assertEqual(recalls, sorted(recalls), "stricter levels must catch more errors")
+        card = info["model_card"]  # only present when MODELS_DIR holds a fine-tuned run
+        if card is not None:
+            for side in ("frozen", "finetuned"):
+                self.assertIn("pearson", card["speechocean_test"][side])
+                self.assertIn("r", card["accents_test"][side])
 
     def test_result_shape(self):
         j = self.score("substitution_there.wav")

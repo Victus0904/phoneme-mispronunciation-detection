@@ -123,6 +123,17 @@ def example_file(name: str):
     return FileResponse(path, media_type="audio/wav")
 
 
+def _model_card():
+    """runs/<name>/model_card.json (scripts/finetune_report.py) when a fine-tuned model is active."""
+    from src.scorer import MODELS_DIR
+    path = os.path.join(MODELS_DIR, "model_card.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
 @app.get("/api/info")
 def info():
     s = get_scorer().info()
@@ -133,6 +144,7 @@ def info():
         "metrics": m, "flag_threshold": s["flag_threshold"], "description": s["description"],
         "examples": _examples(), "hosted": HOSTED, "teacher": {**t.info(), "can_listen": t.can_listen()},
         "fluency_metrics": s.get("fluency_metrics"), "strictness": s.get("strictness"),
+        "model_card": _model_card(),
     }
 
 
