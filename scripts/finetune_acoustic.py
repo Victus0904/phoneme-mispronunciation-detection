@@ -169,7 +169,7 @@ class SOUtterances(torch.utils.data.Dataset):
             else:
                 stats["no_ctc"] += 1
             self.items.append({"audio": r["audio"]["bytes"], "canon": canon, "scores": scores,
-                               "ctc": ctc_ids})
+                               "ctc": ctc_ids, "group": r.get("l1") or "speechocean"})
 
     def __len__(self):
         return len(self.items)
@@ -325,19 +325,45 @@ def pearson(a, b):
 @torch.no_grad()
 def evaluate(model, gop_head, ds, args, cand_cols, blank, C, device, amp_dtype):
     model.eval()
-    P, G, ctc_sum, n = [], [], 0.0, 0
+    P, G, groups, ctc_sum, n = [], [], [], 0.0, 0
     for idx in length_bucketed(ds, args.batch, False, 0):
         b = collate([ds[i] for i in idx])
         ctc, _, p, g = batch_losses(model, gop_head, b, cand_cols, blank, C, device, amp_dtype,
                                     args.err_weight)
         P.append(p); G.append(g); ctc_sum += float(ctc) * len(idx); n += len(idx)
+        for it in b["items"]:
+            groups += [it["group"]] * len(it["scores"])
     model.train()
     P, G = torch.cat(P), torch.cat(G)
     flag = P < 1.75
     err = G < 2
     tp = float((flag & err).sum())
-    return {"r": pearson(P, G), "ctc": ctc_sum / max(n, 1), "n_phones": int(len(G)),
-            "precision@1.75": tp / max(float(flag.sum()), 1), "recall@1.75": tp / max(float(err.sum()), 1)}
+    out = {"r": pearson(P, G), "ctc": ctc_sum / max(n, 1), "n_phones": int(len(G)),
+           "precision@1.75": tp / max(float(flag.sum()), 1), "recall@1.75": tp / max(float(err.sum()), 1)}
+    names = sorted(set(groups))
+    if len(names) > 1:
+        ga = np.array(groups)
+        out["r_by_group"] = {g: pearson(P[torch.from_numpy(ga == g)], G[torch.from_numpy(ga == g)]) for g in names}
+    return out
+
+
+def validate(val_sets, *a):
+    """Evaluate every validation set; the selection metric is the mean r
+    across sets, so adding L2-ARCTIC can't hide a speechocean regression."""
+    res = {name: evaluate(a[0], a[1], ds, *a[2:]) for name, ds in val_sets.items()}
+    res["r"] = float(np.mean([res[name]["r"] for name in val_sets]))
+    return res
+
+
+def _fmt(res):
+    parts = []
+    for name, ev in res.items():
+        if isinstance(ev, dict):
+            parts.append(f"{name}: r={ev['r']:.4f} ctc={ev['ctc']:.3f} P={ev['precision@1.75']:.3f} "
+                         f"R={ev['recall@1.75']:.3f}")
+            if "r_by_group" in ev:
+                parts.append("   " + " ".join(f"{g}={v:.3f}" for g, v in ev["r_by_group"].items()))
+    return "\n  ".join(parts)
 
 
 def fp32_frontend(model):
@@ -393,6 +419,9 @@ def main():
     ap.add_argument("--val-frac", type=float, default=0.1, help="share of TRAIN speakers held out")
     ap.add_argument("--patience", type=int, default=3)
     ap.add_argument("--limit", type=int, default=0, help="use only N train utterances (debugging)")
+    ap.add_argument("--l2arctic", default="", help="l2arctic_annotated.parquet (scripts/l2arctic.py pack): "
+                    "adds its train speakers to training and its val speakers as a second validation set; "
+                    "its test speakers are never read")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--no-checkpointing", action="store_true", help="faster, more memory")
     ap.add_argument("--max-hours", type=float, default=0, help="stop cleanly after this long (budget guard)")
@@ -421,7 +450,20 @@ def main():
     tr = SOUtterances(tr_rows, vocab, cand_idx, blank, stats)
     va = SOUtterances(va_rows, vocab, cand_idx, blank, stats)
     del rows, tr_rows, va_rows
-    print(f"train utts={len(tr)} val utts={len(va)} ({len(val_spk)} speakers)  annotations: {stats}", flush=True)
+    val_sets = {"speechocean": va}
+    print(f"speechocean: train utts={len(tr)} val utts={len(va)} ({len(val_spk)} speakers)", flush=True)
+    if args.l2arctic:
+        l2 = [r for r in pq.read_table(args.l2arctic).to_pylist() if r["split"] in ("train", "val")]
+        if args.limit:
+            random.Random(SEED).shuffle(l2)
+            l2 = l2[:args.limit]
+        l2_tr = SOUtterances([r for r in l2 if r["split"] == "train"], vocab, cand_idx, blank, stats)
+        l2_va = SOUtterances([r for r in l2 if r["split"] == "val"], vocab, cand_idx, blank, stats)
+        del l2
+        tr.items += l2_tr.items
+        val_sets["l2arctic"] = l2_va
+        print(f"l2arctic: train utts={len(l2_tr)} val utts={len(l2_va)}", flush=True)
+    print(f"total train utts={len(tr)}  annotations: {stats}", flush=True)
 
     model = Wav2Vec2ForCTC.from_pretrained(BASE_MODEL, layerdrop=0.0, mask_time_prob=0.05,
                                            ctc_zero_infinity=True).to(device)
@@ -481,12 +523,12 @@ def main():
             loss = ((gop_head(f_all) - y_all) ** 2 * wt).sum() / wt.sum()
             head_opt.zero_grad(); loss.backward(); head_opt.step()
         del feats, ys, f_all, y_all
-        base = evaluate(model, gop_head, va, args, cand_cols, blank, C, device, amp_dtype)
+        base = validate(val_sets, model, gop_head, args, cand_cols, blank, C, device, amp_dtype)
         log["baseline_frozen"] = base
         if not math.isfinite(base["r"]):
             sys.exit(f"frozen baseline is not finite ({base}); refusing to train")
         best_r = base["r"]
-        print(f"frozen baseline (val): {base}", flush=True)
+        print(f"frozen baseline (val): r={base['r']:.4f}\n  {_fmt(base)}", flush=True)
 
     t_start = time.time()
     for epoch in range(start_epoch, args.epochs):
@@ -520,13 +562,13 @@ def main():
                 el = time.time() - t0
                 print(f"ep {epoch} {k + 1}/{len(batches)} ctc={run_ctc / (k + 1):.3f} gop={run_gop / (k + 1):.4f} "
                       f"{(k + 1) * args.batch / el:.2f} utt/s", flush=True)
-        ev = evaluate(model, gop_head, va, args, cand_cols, blank, C, device, amp_dtype)
+        ev = validate(val_sets, model, gop_head, args, cand_cols, blank, C, device, amp_dtype)
         ev.update(epoch=epoch, train_ctc=run_ctc / len(batches), train_gop=run_gop / len(batches),
                   minutes=(time.time() - t0) / 60)
         log["epochs"].append(ev)
         improved = ev["r"] > best_r
-        print(f"epoch {epoch}: val r={ev['r']:.4f} (best {max(best_r, ev['r']):.4f}) ctc={ev['ctc']:.3f} "
-              f"P={ev['precision@1.75']:.3f} R={ev['recall@1.75']:.3f}  {ev['minutes']:.1f} min", flush=True)
+        print(f"epoch {epoch}: val r={ev['r']:.4f} (best {max(best_r, ev['r']):.4f})  {ev['minutes']:.1f} min"
+              f"\n  {_fmt(ev)}", flush=True)
         if improved:
             best_r, bad = ev["r"], 0
             save_hf(model, os.path.join(args.out, "best"))
