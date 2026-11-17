@@ -29,6 +29,8 @@ import uvicorn
 from fastapi import Body, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 
+from src import accounts, l1_profiles
+
 from src.phone_mapping import ARPABET_TO_IPA
 from src.pairs import PAIR_SETS
 from src.scorer import DEFAULT_BUNDLE, Scorer, ScoringError
@@ -43,7 +45,7 @@ MAX_SENTENCE_CHARS = 200
 
 # simple per-visitor rate limits (requests per minute), so one visitor can't
 # monopolise this machine or burn through the free API quotas
-LIMITS = {"score": 20, "feedback": 12, "phonemes": 60, "ask": 10, "pair": 30}
+LIMITS = {"score": 20, "feedback": 12, "phonemes": 60, "ask": 10, "pair": 30, "auth": 10}
 _hits = collections.defaultdict(collections.deque)
 
 
@@ -148,7 +150,7 @@ def phonemes(request: Request, sentence: str = ""):
 
 @app.post("/api/score")
 async def score(request: Request, audio: UploadFile = File(...), sentence: str = Form(""),
-                strictness: str = Form("standard")):
+                strictness: str = Form("standard"), l1: str = Form("")):
     if _limited(request, "score"):
         return {"ok": False, "error": "You're going a little fast -- please wait a moment and try again."}
     if len(sentence) > MAX_SENTENCE_CHARS:
@@ -166,11 +168,117 @@ async def score(request: Request, audio: UploadFile = File(...), sentence: str =
             result = get_scorer().score(np.asarray(wav), sr, sentence, strictness[:20])
     except ScoringError as e:
         return {"ok": False, "error": str(e)}
+    code = _l1(request, l1)
+    if code:  # a short "why this sound, for you" note next to the hand-written tip
+        result["l1"] = code
+        for w in result["words"]:
+            for p in w["phones"]:
+                note = l1_profiles.note_for(code, p["arpa"])
+                if note:
+                    p["l1_note"] = note
     result["id"] = uuid.uuid4().hex
     _results[result["id"]] = result
     while len(_results) > 300:
         _results.popitem(last=False)
     return result
+
+
+# ---------------------------------------------------------------- accounts & first language
+def current_user(request: Request):
+    email = accounts.read_token(request.cookies.get(accounts.COOKIE, ""))
+    return accounts.get_user(email) if email else None
+
+
+def _l1(request: Request, fallback: str = ""):
+    """The learner's first language: their account's, else what a guest picked."""
+    u = current_user(request)
+    code = (u or {}).get("l1") or fallback
+    return code if l1_profiles.valid(code) else None
+
+
+def _session_response(user, status=200):
+    resp = JSONResponse({"ok": True, "user": accounts.public(user)}, status_code=status)
+    resp.set_cookie(accounts.COOKIE, accounts.make_token(user["email"]), max_age=accounts.SESSION_DAYS * 86400,
+                    httponly=True, secure=HOSTED, samesite="lax", path="/")
+    return resp
+
+
+@app.get("/api/languages")
+def languages():
+    return {"languages": l1_profiles.languages()}
+
+
+@app.get("/api/l1/{code}")
+def l1_profile(code: str):
+    if not l1_profiles.valid(code):
+        return JSONResponse({"ok": False, "error": "unknown language"}, status_code=404)
+    return {"ok": True, "profile": l1_profiles.profile(code)}
+
+
+@app.get("/api/me")
+def me(request: Request):
+    u = current_user(request)
+    return {"user": accounts.public(u) if u else None,
+            "profile": l1_profiles.profile(u["l1"]) if u and u.get("l1") else None}
+
+
+@app.post("/api/signup")
+def signup(request: Request, body: dict = Body(...)):
+    if _limited(request, "auth"):
+        return JSONResponse({"ok": False, "error": "Too many attempts -- please wait a minute."}, status_code=429)
+    try:
+        user = accounts.signup(body.get("email", ""), body.get("password", ""), body.get("name", ""))
+    except accounts.AccountError as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=400)
+    code = body.get("l1")
+    if l1_profiles.valid(code or ""):  # a guest who already picked a language keeps it
+        user = accounts.update_profile(user["email"], l1=code)
+    return _session_response(user, 201)
+
+
+@app.post("/api/login")
+def login(request: Request, body: dict = Body(...)):
+    if _limited(request, "auth"):
+        return JSONResponse({"ok": False, "error": "Too many attempts -- please wait a minute."}, status_code=429)
+    try:
+        user = accounts.login(body.get("email", ""), body.get("password", ""))
+    except accounts.AccountError as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=401)
+    return _session_response(user)
+
+
+@app.post("/api/logout")
+def logout():
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie(accounts.COOKIE, path="/")
+    return resp
+
+
+@app.post("/api/profile")
+def update_profile(request: Request, body: dict = Body(...)):
+    u = current_user(request)
+    if u is None:
+        return JSONResponse({"ok": False, "error": "Please log in."}, status_code=401)
+    fields = {}
+    if "l1" in body:
+        if not l1_profiles.valid(body["l1"] or ""):
+            return JSONResponse({"ok": False, "error": "Unknown language."}, status_code=400)
+        fields["l1"] = body["l1"]
+    if "name" in body:
+        fields["name"] = str(body["name"] or "").strip()[:60]
+    u = accounts.update_profile(u["email"], **fields)
+    return {"ok": True, "user": accounts.public(u), "profile": l1_profiles.profile(u["l1"]) if u.get("l1") else None}
+
+
+@app.post("/api/account/delete")
+def delete_account(request: Request):
+    u = current_user(request)
+    if u is None:
+        return JSONResponse({"ok": False, "error": "Please log in."}, status_code=401)
+    accounts.delete_user(u["email"])
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie(accounts.COOKIE, path="/")
+    return resp
 
 
 async def _read_wav(audio: UploadFile):
@@ -187,8 +295,8 @@ async def _read_wav(audio: UploadFile):
 
 @app.get("/api/pairs")
 def pairs():
-    path = os.path.join(ROOT, "models", "pairs_calibration.json")
-    check = json.load(open(path)).get("check") if os.path.exists(path) else None
+    from src.scorer import PAIRS_FILE
+    check = json.load(open(PAIRS_FILE)).get("check") if PAIRS_FILE else None
     from src.tips import get_tip
     return {"sets": [{**st, "tip": get_tip(st["sound"]).replace(" -- ", "; ")} for st in PAIR_SETS], "check": check}
 
@@ -210,7 +318,8 @@ async def pair(request: Request, audio: UploadFile = File(...), set_id: str = Fo
 
 @app.post("/api/ask")
 async def ask(request: Request, audio: UploadFile = File(None), text: str = Form(""),
-              history: str = Form("[]"), result_id: str = Form(""), voice: str = Form("1")):
+              history: str = Form("[]"), result_id: str = Form(""), voice: str = Form("1"),
+              l1: str = Form("")):
     """Talk to the teacher: spoken (Whisper) or typed question -> spoken reply."""
     if _limited(request, "ask"):
         return {"ok": False, "error": "Let's slow down a little -- try again in a moment."}
@@ -230,7 +339,7 @@ async def ask(request: Request, audio: UploadFile = File(None), text: str = Form
         hist = [h for h in hist if isinstance(h, dict)]
     except ValueError:
         hist = []
-    reply, source = t.answer(question, hist, _results.get(result_id))
+    reply, source = t.answer(question, hist, _results.get(result_id), _l1(request, l1))
     audio_out, v = t.speak(reply) if voice != "0" else (None, None)
     return {"ok": True, "question": question, "answer": reply, "source": source, "voice": v or "browser",
             "audio": base64.b64encode(audio_out).decode() if audio_out else None}

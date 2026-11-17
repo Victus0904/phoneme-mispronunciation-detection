@@ -4,6 +4,15 @@ Same setup as the Hugging Face Space (deploy/space/Dockerfile): CPU-only
 torch, the acoustic model and g2p_en's NLTK data baked into the image, and
 HOSTED=1 so the page says audio is sent to the server for scoring.
 
+Model: the multi-accent fine-tuned acoustic model (runs/ft_l2/best, CC BY-NC
+4.0 via L2-ARCTIC), read from the "pmd-ft" Modal volume, with its matching
+heads, strictness thresholds and pair calibration from local runs/ft_l2/.
+Set WEB_MODEL=frozen to deploy the original frozen model instead.
+
+Accounts: stored in the modal.Dict "pmd-accounts"; sessions are signed with
+SESSION_SECRET from the Modal Secret "pmd-session" (create it once:
+modal secret create pmd-session SESSION_SECRET=<random hex>).
+
   modal deploy scripts/modal_web.py      # prints the public https://...modal.run URL
   modal app stop pronunciation-coach     # take it down
 
@@ -22,6 +31,9 @@ import modal
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = "/app"
+RUN = os.environ.get("WEB_RUN", "ft_l2")
+FROZEN = os.environ.get("WEB_MODEL") == "frozen"
+vol = modal.Volume.from_name("pmd-ft")
 
 image = (
     modal.Image.debian_slim(python_version="3.13")
@@ -43,17 +55,26 @@ image = (
     .add_local_dir(os.path.join(ROOT, "models"), f"{APP_DIR}/models")
     .add_local_dir(os.path.join(ROOT, "examples"), f"{APP_DIR}/examples")
 )
+model_env = {"ACCOUNTS_STORE": "modal-dict:pmd-accounts"}
+if not FROZEN:
+    # matching heads for the fine-tuned model (small files; the 1.3 GB model stays on the volume)
+    image = image.add_local_dir(os.path.join(ROOT, "runs", RUN), f"{APP_DIR}/models_ft",
+                                ignore=["best", "best/**", "figures", "figures/**", "log.json", "*.png"])
+    model_env.update({"ACOUSTIC_MODEL": f"/vol/runs/{RUN}/best", "MODELS_DIR": f"{APP_DIR}/models_ft"})
 
 app = modal.App("pronunciation-coach", image=image)
-secrets = [modal.Secret.from_name("coach-keys")] if os.environ.get("COACH_KEYS") == "1" else []
+secrets = [modal.Secret.from_name("pmd-session")]
+if os.environ.get("COACH_KEYS") == "1":
+    secrets.append(modal.Secret.from_name("coach-keys"))
 
 
 @app.function(cpu=2, memory=4096, min_containers=0, max_containers=2, scaledown_window=300,
-              timeout=120, secrets=secrets)
+              timeout=120, secrets=secrets, volumes={} if FROZEN else {"/vol": vol.read_only()})
 @modal.concurrent(max_inputs=8)
 @modal.asgi_app()
 def web():
     import sys
+    os.environ.update(model_env)  # before src.acoustic / src.scorer read them
     sys.path.insert(0, APP_DIR)
     os.chdir(APP_DIR)
     import server

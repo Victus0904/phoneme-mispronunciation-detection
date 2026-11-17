@@ -1,0 +1,1981 @@
+{
+ "source": "L2-ARCTIC v5.0 hand annotations, train+val speakers (CC BY-NC 4.0)",
+ "languages": {
+  "Arabic": {
+   "speakers": [
+    "ABA",
+    "SKA",
+    "YBAA"
+   ],
+   "phones": {
+    "F": {
+     "n": 324,
+     "error_rate": 0.0062,
+     "heard_as": [
+      "V",
+      "M"
+     ]
+    },
+    "AO": {
+     "n": 262,
+     "error_rate": 0.0573,
+     "heard_as": [
+      "OW",
+      "AA",
+      "UW"
+     ]
+    },
+    "R": {
+     "n": 673,
+     "error_rate": 0.4799,
+     "heard_as": [
+      "(dropped)",
+      "D",
+      "IY"
+     ]
+    },
+    "DH": {
+     "n": 440,
+     "error_rate": 0.1795,
+     "heard_as": [
+      "Z",
+      "S",
+      "D"
+     ]
+    },
+    "AH": {
+     "n": 1326,
+     "error_rate": 0.0807,
+     "heard_as": [
+      "AO",
+      "EH",
+      "(dropped)"
+     ]
+    },
+    "T": {
+     "n": 879,
+     "error_rate": 0.0432,
+     "heard_as": [
+      "(dropped)",
+      "D",
+      "D AH"
+     ]
+    },
+    "W": {
+     "n": 390,
+     "error_rate": 0.0051,
+     "heard_as": [
+      "(dropped)",
+      "AO"
+     ]
+    },
+    "EH": {
+     "n": 411,
+     "error_rate": 0.0973,
+     "heard_as": [
+      "IH",
+      "IY",
+      "AH"
+     ]
+    },
+    "N": {
+     "n": 884,
+     "error_rate": 0.0068,
+     "heard_as": [
+      "(dropped)",
+      "NG"
+     ]
+    },
+    "IY": {
+     "n": 623,
+     "error_rate": 0.0177,
+     "heard_as": [
+      "EH",
+      "IH",
+      "(dropped)"
+     ]
+    },
+    "IH": {
+     "n": 921,
+     "error_rate": 0.0684,
+     "heard_as": [
+      "EH",
+      "(dropped)",
+      "EY"
+     ]
+    },
+    "TH": {
+     "n": 101,
+     "error_rate": 0.2178,
+     "heard_as": [
+      "S",
+      "Z",
+      "T"
+     ]
+    },
+    "AY": {
+     "n": 281,
+     "error_rate": 0.0391,
+     "heard_as": [
+      "EY",
+      "EH",
+      "AA"
+     ]
+    },
+    "M": {
+     "n": 422,
+     "error_rate": 0.0,
+     "heard_as": []
+    },
+    "AE": {
+     "n": 396,
+     "error_rate": 0.0732,
+     "heard_as": [
+      "AA",
+      "AH",
+      "IH"
+     ]
+    },
+    "V": {
+     "n": 283,
+     "error_rate": 0.0565,
+     "heard_as": [
+      "F",
+      "(dropped)"
+     ]
+    },
+    "NG": {
+     "n": 174,
+     "error_rate": 0.0402,
+     "heard_as": [
+      "N",
+      "N T",
+      "N G"
+     ]
+    },
+    "UW": {
+     "n": 272,
+     "error_rate": 0.0772,
+     "heard_as": [
+      "AO",
+      "UH",
+      "OW"
+     ]
+    },
+    "SH": {
+     "n": 154,
+     "error_rate": 0.0325,
+     "heard_as": [
+      "ZH",
+      "CH"
+     ]
+    },
+    "UH": {
+     "n": 94,
+     "error_rate": 0.0426,
+     "heard_as": [
+      "AO",
+      "OW",
+      "AH"
+     ]
+    },
+    "K": {
+     "n": 394,
+     "error_rate": 0.0305,
+     "heard_as": [
+      "(dropped)",
+      "G",
+      "T"
+     ]
+    },
+    "HH": {
+     "n": 423,
+     "error_rate": 0.0071,
+     "heard_as": [
+      "(dropped)"
+     ]
+    },
+    "D": {
+     "n": 677,
+     "error_rate": 0.0487,
+     "heard_as": [
+      "(dropped)",
+      "T",
+      "JH"
+     ]
+    },
+    "Z": {
+     "n": 469,
+     "error_rate": 0.1429,
+     "heard_as": [
+      "S",
+      "(dropped)",
+      "DH"
+     ]
+    },
+    "L": {
+     "n": 613,
+     "error_rate": 0.0392,
+     "heard_as": [
+      "(dropped)"
+     ]
+    },
+    "ER": {
+     "n": 361,
+     "error_rate": 0.277,
+     "heard_as": [
+      "AH",
+      "R",
+      "EH"
+     ]
+    },
+    "G": {
+     "n": 131,
+     "error_rate": 0.0153,
+     "heard_as": [
+      "(dropped)",
+      "K"
+     ]
+    },
+    "AA": {
+     "n": 182,
+     "error_rate": 0.2747,
+     "heard_as": [
+      "AO",
+      "OW",
+      "EH"
+     ]
+    },
+    "B": {
+     "n": 253,
+     "error_rate": 0.1225,
+     "heard_as": [
+      "P",
+      "P R",
+      "(dropped)"
+     ]
+    },
+    "S": {
+     "n": 574,
+     "error_rate": 0.0226,
+     "heard_as": [
+      "Z",
+      "TH"
+     ]
+    },
+    "OW": {
+     "n": 235,
+     "error_rate": 0.2638,
+     "heard_as": [
+      "AO",
+      "UW",
+      "IY"
+     ]
+    },
+    "P": {
+     "n": 293,
+     "error_rate": 0.314,
+     "heard_as": [
+      "B",
+      "(dropped)",
+      "F"
+     ]
+    },
+    "Y": {
+     "n": 118,
+     "error_rate": 0.0593,
+     "heard_as": [
+      "(dropped)",
+      "JH"
+     ]
+    },
+    "EY": {
+     "n": 267,
+     "error_rate": 0.176,
+     "heard_as": [
+      "EH",
+      "IH",
+      "IY"
+     ]
+    },
+    "JH": {
+     "n": 127,
+     "error_rate": 0.4252,
+     "heard_as": [
+      "ZH",
+      "CH",
+      "(dropped)"
+     ]
+    },
+    "AW": {
+     "n": 82,
+     "error_rate": 0.0732,
+     "heard_as": [
+      "OW",
+      "AA",
+      "AO"
+     ]
+    },
+    "CH": {
+     "n": 101,
+     "error_rate": 0.0594,
+     "heard_as": [
+      "SH",
+      "ZH"
+     ]
+    }
+   }
+  },
+  "Hindi": {
+   "speakers": [
+    "ASI",
+    "RRBI",
+    "SVBI"
+   ],
+   "phones": {
+    "F": {
+     "n": 302,
+     "error_rate": 0.0099,
+     "heard_as": [
+      "V",
+      "(dropped)"
+     ]
+    },
+    "AO": {
+     "n": 229,
+     "error_rate": 0.0175,
+     "heard_as": [
+      "AA",
+      "UH"
+     ]
+    },
+    "R": {
+     "n": 590,
+     "error_rate": 0.3458,
+     "heard_as": [
+      "(dropped)",
+      "L",
+      "AH"
+     ]
+    },
+    "DH": {
+     "n": 455,
+     "error_rate": 0.4,
+     "heard_as": [
+      "D",
+      "Z",
+      "T"
+     ]
+    },
+    "AH": {
+     "n": 1302,
+     "error_rate": 0.0445,
+     "heard_as": [
+      "AO",
+      "AA",
+      "UH"
+     ]
+    },
+    "T": {
+     "n": 854,
+     "error_rate": 0.2588,
+     "heard_as": [
+      "(dropped)",
+      "D"
+     ]
+    },
+    "W": {
+     "n": 398,
+     "error_rate": 0.1608,
+     "heard_as": [
+      "V",
+      "(dropped)"
+     ]
+    },
+    "EH": {
+     "n": 345,
+     "error_rate": 0.0261,
+     "heard_as": [
+      "(dropped)",
+      "AE",
+      "ER"
+     ]
+    },
+    "N": {
+     "n": 859,
+     "error_rate": 0.0687,
+     "heard_as": [
+      "(dropped)",
+      "Y"
+     ]
+    },
+    "IY": {
+     "n": 575,
+     "error_rate": 0.0122,
+     "heard_as": [
+      "EH",
+      "AH",
+      "IH"
+     ]
+    },
+    "IH": {
+     "n": 937,
+     "error_rate": 0.0342,
+     "heard_as": [
+      "IY",
+      "EH",
+      "AY"
+     ]
+    },
+    "TH": {
+     "n": 137,
+     "error_rate": 0.5182,
+     "heard_as": [
+      "T",
+      "D",
+      "(dropped)"
+     ]
+    },
+    "AY": {
+     "n": 267,
+     "error_rate": 0.0262,
+     "heard_as": [
+      "AA",
+      "AH",
+      "EH"
+     ]
+    },
+    "M": {
+     "n": 409,
+     "error_rate": 0.0,
+     "heard_as": []
+    },
+    "AE": {
+     "n": 396,
+     "error_rate": 0.0783,
+     "heard_as": [
+      "AA",
+      "AH",
+      "EH"
+     ]
+    },
+    "V": {
+     "n": 276,
+     "error_rate": 0.4094,
+     "heard_as": [
+      "F",
+      "W",
+      "(dropped)"
+     ]
+    },
+    "NG": {
+     "n": 195,
+     "error_rate": 0.0051,
+     "heard_as": [
+      "N"
+     ]
+    },
+    "UW": {
+     "n": 281,
+     "error_rate": 0.0214,
+     "heard_as": [
+      "IY",
+      "IH",
+      "UH"
+     ]
+    },
+    "SH": {
+     "n": 174,
+     "error_rate": 0.023,
+     "heard_as": [
+      "S HH",
+      "CH",
+      "ZH"
+     ]
+    },
+    "UH": {
+     "n": 85,
+     "error_rate": 0.1529,
+     "heard_as": [
+      "UW",
+      "OW",
+      "ER"
+     ]
+    },
+    "K": {
+     "n": 405,
+     "error_rate": 0.0889,
+     "heard_as": [
+      "G",
+      "(dropped)",
+      "T"
+     ]
+    },
+    "HH": {
+     "n": 434,
+     "error_rate": 0.0714,
+     "heard_as": [
+      "(dropped)",
+      "T",
+      "Y"
+     ]
+    },
+    "Z": {
+     "n": 500,
+     "error_rate": 0.406,
+     "heard_as": [
+      "S",
+      "(dropped)"
+     ]
+    },
+    "L": {
+     "n": 562,
+     "error_rate": 0.0979,
+     "heard_as": [
+      "(dropped)"
+     ]
+    },
+    "ER": {
+     "n": 413,
+     "error_rate": 0.5157,
+     "heard_as": [
+      "AH",
+      "R",
+      "UH"
+     ]
+    },
+    "G": {
+     "n": 150,
+     "error_rate": 0.08,
+     "heard_as": [
+      "K",
+      "(dropped)",
+      "JH"
+     ]
+    },
+    "AA": {
+     "n": 188,
+     "error_rate": 0.2181,
+     "heard_as": [
+      "AO",
+      "EH",
+      "OW"
+     ]
+    },
+    "D": {
+     "n": 675,
+     "error_rate": 0.2341,
+     "heard_as": [
+      "(dropped)",
+      "T",
+      "R"
+     ]
+    },
+    "B": {
+     "n": 261,
+     "error_rate": 0.0307,
+     "heard_as": [
+      "(dropped)",
+      "P",
+      "V"
+     ]
+    },
+    "S": {
+     "n": 547,
+     "error_rate": 0.0219,
+     "heard_as": [
+      "Z",
+      "(dropped)",
+      "ZH"
+     ]
+    },
+    "OW": {
+     "n": 241,
+     "error_rate": 0.4108,
+     "heard_as": [
+      "AO",
+      "UH",
+      "W"
+     ]
+    },
+    "P": {
+     "n": 271,
+     "error_rate": 0.1365,
+     "heard_as": [
+      "B",
+      "(dropped)",
+      "F"
+     ]
+    },
+    "Y": {
+     "n": 135,
+     "error_rate": 0.0296,
+     "heard_as": [
+      "(dropped)"
+     ]
+    },
+    "EY": {
+     "n": 299,
+     "error_rate": 0.3746,
+     "heard_as": [
+      "EH",
+      "IH",
+      "AH"
+     ]
+    },
+    "JH": {
+     "n": 66,
+     "error_rate": 0.3485,
+     "heard_as": [
+      "ZH",
+      "CH",
+      "T"
+     ]
+    },
+    "AW": {
+     "n": 85,
+     "error_rate": 0.2353,
+     "heard_as": [
+      "AO",
+      "OW",
+      "AA"
+     ]
+    },
+    "CH": {
+     "n": 87,
+     "error_rate": 0.0,
+     "heard_as": []
+    }
+   }
+  },
+  "Korean": {
+   "speakers": [
+    "HJK",
+    "HKK",
+    "YDCK"
+   ],
+   "phones": {
+    "F": {
+     "n": 309,
+     "error_rate": 0.0259,
+     "heard_as": [
+      "P",
+      "(dropped)"
+     ]
+    },
+    "R": {
+     "n": 624,
+     "error_rate": 0.0737,
+     "heard_as": [
+      "(dropped)",
+      "L",
+      "M"
+     ]
+    },
+    "ER": {
+     "n": 414,
+     "error_rate": 0.0266,
+     "heard_as": [
+      "AH",
+      "AO",
+      "UW"
+     ]
+    },
+    "DH": {
+     "n": 485,
+     "error_rate": 0.5773,
+     "heard_as": [
+      "D",
+      "T",
+      "TH"
+     ]
+    },
+    "AH": {
+     "n": 1315,
+     "error_rate": 0.0289,
+     "heard_as": [
+      "AO",
+      "IH",
+      "EH"
+     ]
+    },
+    "T": {
+     "n": 865,
+     "error_rate": 0.0566,
+     "heard_as": [
+      "(dropped)",
+      "R",
+      "P"
+     ]
+    },
+    "W": {
+     "n": 385,
+     "error_rate": 0.0156,
+     "heard_as": [
+      "(dropped)",
+      "Y"
+     ]
+    },
+    "EH": {
+     "n": 393,
+     "error_rate": 0.1832,
+     "heard_as": [
+      "AE",
+      "AA",
+      "IH"
+     ]
+    },
+    "N": {
+     "n": 934,
+     "error_rate": 0.0043,
+     "heard_as": [
+      "M",
+      "L"
+     ]
+    },
+    "IY": {
+     "n": 623,
+     "error_rate": 0.0385,
+     "heard_as": [
+      "IH",
+      "EH",
+      "(dropped)"
+     ]
+    },
+    "TH": {
+     "n": 85,
+     "error_rate": 0.2235,
+     "heard_as": [
+      "S",
+      "T",
+      "D"
+     ]
+    },
+    "AY": {
+     "n": 239,
+     "error_rate": 0.0126,
+     "heard_as": [
+      "AA",
+      "AH"
+     ]
+    },
+    "M": {
+     "n": 443,
+     "error_rate": 0.0,
+     "heard_as": []
+    },
+    "AE": {
+     "n": 398,
+     "error_rate": 0.0251,
+     "heard_as": [
+      "EY",
+      "EH",
+      "AO"
+     ]
+    },
+    "V": {
+     "n": 339,
+     "error_rate": 0.0767,
+     "heard_as": [
+      "B",
+      "P",
+      "F"
+     ]
+    },
+    "IH": {
+     "n": 964,
+     "error_rate": 0.1058,
+     "heard_as": [
+      "IY",
+      "EY",
+      "(dropped)"
+     ]
+    },
+    "NG": {
+     "n": 143,
+     "error_rate": 0.0,
+     "heard_as": []
+    },
+    "UW": {
+     "n": 246,
+     "error_rate": 0.0163,
+     "heard_as": [
+      "UH",
+      "(dropped)",
+      "AA"
+     ]
+    },
+    "SH": {
+     "n": 144,
+     "error_rate": 0.0069,
+     "heard_as": [
+      "S"
+     ]
+    },
+    "UH": {
+     "n": 88,
+     "error_rate": 0.0568,
+     "heard_as": [
+      "UW",
+      "AO"
+     ]
+    },
+    "K": {
+     "n": 345,
+     "error_rate": 0.0203,
+     "heard_as": [
+      "(dropped)"
+     ]
+    },
+    "HH": {
+     "n": 407,
+     "error_rate": 0.059,
+     "heard_as": [
+      "(dropped)",
+      "JH"
+     ]
+    },
+    "D": {
+     "n": 692,
+     "error_rate": 0.1113,
+     "heard_as": [
+      "(dropped)",
+      "T",
+      "R"
+     ]
+    },
+    "Z": {
+     "n": 499,
+     "error_rate": 0.5311,
+     "heard_as": [
+      "S",
+      "JH",
+      "ZH"
+     ]
+    },
+    "L": {
+     "n": 562,
+     "error_rate": 0.0623,
+     "heard_as": [
+      "R",
+      "(dropped)"
+     ]
+    },
+    "G": {
+     "n": 156,
+     "error_rate": 0.0321,
+     "heard_as": [
+      "K",
+      "(dropped)"
+     ]
+    },
+    "AA": {
+     "n": 186,
+     "error_rate": 0.043,
+     "heard_as": [
+      "OW",
+      "AO",
+      "ER"
+     ]
+    },
+    "B": {
+     "n": 228,
+     "error_rate": 0.0263,
+     "heard_as": [
+      "V",
+      "(dropped)",
+      "P AH"
+     ]
+    },
+    "S": {
+     "n": 564,
+     "error_rate": 0.0018,
+     "heard_as": [
+      "TH"
+     ]
+    },
+    "OW": {
+     "n": 229,
+     "error_rate": 0.1747,
+     "heard_as": [
+      "AO",
+      "UH",
+      "AA"
+     ]
+    },
+    "P": {
+     "n": 301,
+     "error_rate": 0.0432,
+     "heard_as": [
+      "F",
+      "(dropped)"
+     ]
+    },
+    "Y": {
+     "n": 128,
+     "error_rate": 0.0,
+     "heard_as": []
+    },
+    "AO": {
+     "n": 192,
+     "error_rate": 0.099,
+     "heard_as": [
+      "OW",
+      "ER",
+      "AH"
+     ]
+    },
+    "EY": {
+     "n": 301,
+     "error_rate": 0.0399,
+     "heard_as": [
+      "EH",
+      "AE",
+      "(dropped)"
+     ]
+    },
+    "JH": {
+     "n": 99,
+     "error_rate": 0.202,
+     "heard_as": [
+      "SH",
+      "CH",
+      "ZH"
+     ]
+    },
+    "AW": {
+     "n": 121,
+     "error_rate": 0.0413,
+     "heard_as": [
+      "AH",
+      "AA",
+      "AO"
+     ]
+    },
+    "CH": {
+     "n": 105,
+     "error_rate": 0.0095,
+     "heard_as": [
+      "SH"
+     ]
+    }
+   }
+  },
+  "Mandarin": {
+   "speakers": [
+    "BWC",
+    "LXC",
+    "NCC"
+   ],
+   "phones": {
+    "F": {
+     "n": 323,
+     "error_rate": 0.0062,
+     "heard_as": [
+      "V"
+     ]
+    },
+    "AO": {
+     "n": 243,
+     "error_rate": 0.037,
+     "heard_as": [
+      "OW",
+      "EH",
+      "AW"
+     ]
+    },
+    "R": {
+     "n": 593,
+     "error_rate": 0.2024,
+     "heard_as": [
+      "(dropped)",
+      "AH",
+      "L"
+     ]
+    },
+    "DH": {
+     "n": 426,
+     "error_rate": 0.77,
+     "heard_as": [
+      "D",
+      "L",
+      "(dropped)"
+     ]
+    },
+    "AH": {
+     "n": 1388,
+     "error_rate": 0.1088,
+     "heard_as": [
+      "AO",
+      "AA",
+      "(dropped)"
+     ]
+    },
+    "T": {
+     "n": 872,
+     "error_rate": 0.1273,
+     "heard_as": [
+      "(dropped)",
+      "S",
+      "N"
+     ]
+    },
+    "W": {
+     "n": 430,
+     "error_rate": 0.0419,
+     "heard_as": [
+      "(dropped)",
+      "V",
+      "R"
+     ]
+    },
+    "EH": {
+     "n": 373,
+     "error_rate": 0.1716,
+     "heard_as": [
+      "AE",
+      "EY",
+      "IY"
+     ]
+    },
+    "N": {
+     "n": 925,
+     "error_rate": 0.1719,
+     "heard_as": [
+      "NG",
+      "(dropped)",
+      "L"
+     ]
+    },
+    "IY": {
+     "n": 598,
+     "error_rate": 0.0401,
+     "heard_as": [
+      "IH",
+      "(dropped)",
+      "EH"
+     ]
+    },
+    "IH": {
+     "n": 896,
+     "error_rate": 0.1842,
+     "heard_as": [
+      "IY",
+      "(dropped)",
+      "EH"
+     ]
+    },
+    "TH": {
+     "n": 122,
+     "error_rate": 0.4344,
+     "heard_as": [
+      "S",
+      "T",
+      "(dropped)"
+     ]
+    },
+    "AY": {
+     "n": 282,
+     "error_rate": 0.1277,
+     "heard_as": [
+      "AA",
+      "AE",
+      "IH"
+     ]
+    },
+    "M": {
+     "n": 434,
+     "error_rate": 0.0276,
+     "heard_as": [
+      "NG",
+      "N",
+      "(dropped)"
+     ]
+    },
+    "AE": {
+     "n": 423,
+     "error_rate": 0.0402,
+     "heard_as": [
+      "AA",
+      "EH",
+      "AW"
+     ]
+    },
+    "V": {
+     "n": 283,
+     "error_rate": 0.3251,
+     "heard_as": [
+      "F",
+      "W",
+      "(dropped)"
+     ]
+    },
+    "NG": {
+     "n": 159,
+     "error_rate": 0.0881,
+     "heard_as": [
+      "N",
+      "(dropped)",
+      "M"
+     ]
+    },
+    "UW": {
+     "n": 278,
+     "error_rate": 0.054,
+     "heard_as": [
+      "AO",
+      "OW",
+      "UH"
+     ]
+    },
+    "SH": {
+     "n": 188,
+     "error_rate": 0.016,
+     "heard_as": [
+      "(dropped)",
+      "CH"
+     ]
+    },
+    "UH": {
+     "n": 88,
+     "error_rate": 0.0682,
+     "heard_as": [
+      "UW",
+      "AO"
+     ]
+    },
+    "K": {
+     "n": 379,
+     "error_rate": 0.0422,
+     "heard_as": [
+      "(dropped)",
+      "W",
+      "G"
+     ]
+    },
+    "HH": {
+     "n": 423,
+     "error_rate": 0.0615,
+     "heard_as": [
+      "(dropped)",
+      "SH"
+     ]
+    },
+    "Z": {
+     "n": 469,
+     "error_rate": 0.6823,
+     "heard_as": [
+      "S",
+      "(dropped)",
+      "T"
+     ]
+    },
+    "L": {
+     "n": 581,
+     "error_rate": 0.3219,
+     "heard_as": [
+      "W",
+      "(dropped)",
+      "R"
+     ]
+    },
+    "ER": {
+     "n": 390,
+     "error_rate": 0.2487,
+     "heard_as": [
+      "AH",
+      "AO",
+      "(dropped)"
+     ]
+    },
+    "G": {
+     "n": 138,
+     "error_rate": 0.0362,
+     "heard_as": [
+      "(dropped)",
+      "K"
+     ]
+    },
+    "AA": {
+     "n": 162,
+     "error_rate": 0.1605,
+     "heard_as": [
+      "AO",
+      "OW",
+      "EH"
+     ]
+    },
+    "D": {
+     "n": 712,
+     "error_rate": 0.1756,
+     "heard_as": [
+      "(dropped)",
+      "T",
+      "AH"
+     ]
+    },
+    "B": {
+     "n": 248,
+     "error_rate": 0.0323,
+     "heard_as": [
+      "P",
+      "F",
+      "V"
+     ]
+    },
+    "S": {
+     "n": 567,
+     "error_rate": 0.0176,
+     "heard_as": [
+      "(dropped)",
+      "SH",
+      "Z"
+     ]
+    },
+    "OW": {
+     "n": 233,
+     "error_rate": 0.1717,
+     "heard_as": [
+      "AO",
+      "AH",
+      "AA"
+     ]
+    },
+    "P": {
+     "n": 284,
+     "error_rate": 0.0352,
+     "heard_as": [
+      "(dropped)",
+      "B",
+      "T"
+     ]
+    },
+    "Y": {
+     "n": 119,
+     "error_rate": 0.0504,
+     "heard_as": [
+      "(dropped)",
+      "IH",
+      "IY"
+     ]
+    },
+    "EY": {
+     "n": 243,
+     "error_rate": 0.177,
+     "heard_as": [
+      "EH",
+      "AE",
+      "IY"
+     ]
+    },
+    "JH": {
+     "n": 60,
+     "error_rate": 0.3833,
+     "heard_as": [
+      "CH",
+      "SH",
+      "G"
+     ]
+    },
+    "AW": {
+     "n": 122,
+     "error_rate": 0.2213,
+     "heard_as": [
+      "AA",
+      "AO",
+      "AH"
+     ]
+    },
+    "CH": {
+     "n": 109,
+     "error_rate": 0.055,
+     "heard_as": [
+      "SH",
+      "S",
+      "T"
+     ]
+    }
+   }
+  },
+  "Spanish": {
+   "speakers": [
+    "EBVS",
+    "ERMS",
+    "MBMPS"
+   ],
+   "phones": {
+    "F": {
+     "n": 322,
+     "error_rate": 0.0124,
+     "heard_as": [
+      "V",
+      "(dropped)"
+     ]
+    },
+    "AO": {
+     "n": 202,
+     "error_rate": 0.0693,
+     "heard_as": [
+      "OW",
+      "AW",
+      "UH"
+     ]
+    },
+    "R": {
+     "n": 633,
+     "error_rate": 0.0442,
+     "heard_as": [
+      "(dropped)",
+      "ER",
+      "L"
+     ]
+    },
+    "DH": {
+     "n": 448,
+     "error_rate": 0.5915,
+     "heard_as": [
+      "D",
+      "(dropped)",
+      "T"
+     ]
+    },
+    "AH": {
+     "n": 1402,
+     "error_rate": 0.1919,
+     "heard_as": [
+      "AA",
+      "AO",
+      "EH"
+     ]
+    },
+    "T": {
+     "n": 903,
+     "error_rate": 0.1152,
+     "heard_as": [
+      "(dropped)",
+      "D",
+      "DH"
+     ]
+    },
+    "W": {
+     "n": 390,
+     "error_rate": 0.0077,
+     "heard_as": [
+      "(dropped)",
+      "Y"
+     ]
+    },
+    "EH": {
+     "n": 410,
+     "error_rate": 0.078,
+     "heard_as": [
+      "EY",
+      "IH",
+      "AA"
+     ]
+    },
+    "N": {
+     "n": 921,
+     "error_rate": 0.1042,
+     "heard_as": [
+      "NG",
+      "(dropped)",
+      "M"
+     ]
+    },
+    "IY": {
+     "n": 610,
+     "error_rate": 0.0344,
+     "heard_as": [
+      "EH",
+      "(dropped)",
+      "IH"
+     ]
+    },
+    "IH": {
+     "n": 942,
+     "error_rate": 0.3397,
+     "heard_as": [
+      "IY",
+      "(dropped)",
+      "EH"
+     ]
+    },
+    "TH": {
+     "n": 100,
+     "error_rate": 0.73,
+     "heard_as": [
+      "T",
+      "D",
+      "(dropped)"
+     ]
+    },
+    "AY": {
+     "n": 300,
+     "error_rate": 0.0467,
+     "heard_as": [
+      "AA",
+      "IY",
+      "IH"
+     ]
+    },
+    "M": {
+     "n": 455,
+     "error_rate": 0.0198,
+     "heard_as": [
+      "N",
+      "(dropped)"
+     ]
+    },
+    "AE": {
+     "n": 381,
+     "error_rate": 0.4016,
+     "heard_as": [
+      "AA",
+      "AH",
+      "EY"
+     ]
+    },
+    "V": {
+     "n": 321,
+     "error_rate": 0.3396,
+     "heard_as": [
+      "B",
+      "F",
+      "(dropped)"
+     ]
+    },
+    "NG": {
+     "n": 155,
+     "error_rate": 0.1548,
+     "heard_as": [
+      "N",
+      "(dropped)",
+      "N D"
+     ]
+    },
+    "UW": {
+     "n": 229,
+     "error_rate": 0.048,
+     "heard_as": [
+      "OW",
+      "AO",
+      "UH"
+     ]
+    },
+    "SH": {
+     "n": 159,
+     "error_rate": 0.0314,
+     "heard_as": [
+      "CH",
+      "T UH",
+      "S"
+     ]
+    },
+    "UH": {
+     "n": 77,
+     "error_rate": 0.1948,
+     "heard_as": [
+      "UW",
+      "AO",
+      "IH"
+     ]
+    },
+    "K": {
+     "n": 381,
+     "error_rate": 0.0472,
+     "heard_as": [
+      "(dropped)",
+      "G",
+      "HH"
+     ]
+    },
+    "HH": {
+     "n": 452,
+     "error_rate": 0.1681,
+     "heard_as": [
+      "(dropped)",
+      "K",
+      "G"
+     ]
+    },
+    "Z": {
+     "n": 494,
+     "error_rate": 0.7733,
+     "heard_as": [
+      "S",
+      "(dropped)",
+      "TH"
+     ]
+    },
+    "L": {
+     "n": 611,
+     "error_rate": 0.036,
+     "heard_as": [
+      "(dropped)",
+      "R",
+      "IY AH"
+     ]
+    },
+    "ER": {
+     "n": 393,
+     "error_rate": 0.0789,
+     "heard_as": [
+      "R",
+      "EH",
+      "AO R"
+     ]
+    },
+    "G": {
+     "n": 139,
+     "error_rate": 0.1151,
+     "heard_as": [
+      "K",
+      "(dropped)",
+      "HH"
+     ]
+    },
+    "AA": {
+     "n": 172,
+     "error_rate": 0.2151,
+     "heard_as": [
+      "AO",
+      "OW",
+      "AH"
+     ]
+    },
+    "D": {
+     "n": 715,
+     "error_rate": 0.2294,
+     "heard_as": [
+      "(dropped)",
+      "T",
+      "DH"
+     ]
+    },
+    "B": {
+     "n": 243,
+     "error_rate": 0.0741,
+     "heard_as": [
+      "V",
+      "P",
+      "R"
+     ]
+    },
+    "S": {
+     "n": 619,
+     "error_rate": 0.0549,
+     "heard_as": [
+      "(dropped)",
+      "Z",
+      "TH"
+     ]
+    },
+    "OW": {
+     "n": 227,
+     "error_rate": 0.1454,
+     "heard_as": [
+      "AO",
+      "R",
+      "AW"
+     ]
+    },
+    "P": {
+     "n": 282,
+     "error_rate": 0.1241,
+     "heard_as": [
+      "B",
+      "(dropped)",
+      "F"
+     ]
+    },
+    "Y": {
+     "n": 108,
+     "error_rate": 0.1389,
+     "heard_as": [
+      "JH",
+      "IY"
+     ]
+    },
+    "EY": {
+     "n": 311,
+     "error_rate": 0.0772,
+     "heard_as": [
+      "AA",
+      "AY",
+      "EH"
+     ]
+    },
+    "JH": {
+     "n": 98,
+     "error_rate": 0.4694,
+     "heard_as": [
+      "CH",
+      "Y",
+      "SH"
+     ]
+    },
+    "AW": {
+     "n": 98,
+     "error_rate": 0.102,
+     "heard_as": [
+      "AO",
+      "OW",
+      "AA"
+     ]
+    },
+    "CH": {
+     "n": 114,
+     "error_rate": 0.0526,
+     "heard_as": [
+      "SH",
+      "T",
+      "ZH"
+     ]
+    }
+   }
+  },
+  "Vietnamese": {
+   "speakers": [
+    "HQTV",
+    "PNV",
+    "THV"
+   ],
+   "phones": {
+    "F": {
+     "n": 324,
+     "error_rate": 0.0895,
+     "heard_as": [
+      "P",
+      "(dropped)",
+      "V"
+     ]
+    },
+    "AO": {
+     "n": 257,
+     "error_rate": 0.1323,
+     "heard_as": [
+      "AH",
+      "OW",
+      "UH"
+     ]
+    },
+    "R": {
+     "n": 637,
+     "error_rate": 0.3689,
+     "heard_as": [
+      "(dropped)",
+      "AH",
+      "W"
+     ]
+    },
+    "DH": {
+     "n": 441,
+     "error_rate": 0.6599,
+     "heard_as": [
+      "D",
+      "(dropped)",
+      "L"
+     ]
+    },
+    "AH": {
+     "n": 1387,
+     "error_rate": 0.1766,
+     "heard_as": [
+      "AO",
+      "AA",
+      "(dropped)"
+     ]
+    },
+    "T": {
+     "n": 901,
+     "error_rate": 0.2464,
+     "heard_as": [
+      "(dropped)",
+      "S",
+      "Z"
+     ]
+    },
+    "W": {
+     "n": 415,
+     "error_rate": 0.0145,
+     "heard_as": [
+      "(dropped)",
+      "HH",
+      "G"
+     ]
+    },
+    "EH": {
+     "n": 405,
+     "error_rate": 0.0988,
+     "heard_as": [
+      "AE",
+      "EY",
+      "AH"
+     ]
+    },
+    "N": {
+     "n": 924,
+     "error_rate": 0.1147,
+     "heard_as": [
+      "(dropped)",
+      "NG",
+      "D"
+     ]
+    },
+    "IY": {
+     "n": 593,
+     "error_rate": 0.0691,
+     "heard_as": [
+      "IH",
+      "(dropped)",
+      "OW"
+     ]
+    },
+    "IH": {
+     "n": 928,
+     "error_rate": 0.1875,
+     "heard_as": [
+      "IY",
+      "(dropped)",
+      "AY"
+     ]
+    },
+    "TH": {
+     "n": 107,
+     "error_rate": 0.5047,
+     "heard_as": [
+      "T",
+      "(dropped)",
+      "F"
+     ]
+    },
+    "AY": {
+     "n": 268,
+     "error_rate": 0.0597,
+     "heard_as": [
+      "AA",
+      "IY",
+      "AH"
+     ]
+    },
+    "M": {
+     "n": 411,
+     "error_rate": 0.0097,
+     "heard_as": [
+      "(dropped)",
+      "NG",
+      "N"
+     ]
+    },
+    "AE": {
+     "n": 395,
+     "error_rate": 0.3114,
+     "heard_as": [
+      "EH",
+      "EY",
+      "AA"
+     ]
+    },
+    "V": {
+     "n": 333,
+     "error_rate": 0.3123,
+     "heard_as": [
+      "(dropped)",
+      "B",
+      "F"
+     ]
+    },
+    "NG": {
+     "n": 144,
+     "error_rate": 0.2014,
+     "heard_as": [
+      "N",
+      "(dropped)",
+      "N ZH"
+     ]
+    },
+    "UW": {
+     "n": 244,
+     "error_rate": 0.0574,
+     "heard_as": [
+      "AH",
+      "UH",
+      "AH S"
+     ]
+    },
+    "SH": {
+     "n": 161,
+     "error_rate": 0.1491,
+     "heard_as": [
+      "S",
+      "ZH",
+      "HH"
+     ]
+    },
+    "UH": {
+     "n": 92,
+     "error_rate": 0.3152,
+     "heard_as": [
+      "UW",
+      "AH",
+      "AO"
+     ]
+    },
+    "K": {
+     "n": 373,
+     "error_rate": 0.1582,
+     "heard_as": [
+      "(dropped)",
+      "G",
+      "S"
+     ]
+    },
+    "HH": {
+     "n": 407,
+     "error_rate": 0.027,
+     "heard_as": [
+      "(dropped)",
+      "S",
+      "CH"
+     ]
+    },
+    "D": {
+     "n": 726,
+     "error_rate": 0.4339,
+     "heard_as": [
+      "(dropped)",
+      "T",
+      "S"
+     ]
+    },
+    "Z": {
+     "n": 497,
+     "error_rate": 0.4507,
+     "heard_as": [
+      "S",
+      "(dropped)",
+      "ZH"
+     ]
+    },
+    "L": {
+     "n": 622,
+     "error_rate": 0.4051,
+     "heard_as": [
+      "(dropped)",
+      "W",
+      "N"
+     ]
+    },
+    "ER": {
+     "n": 384,
+     "error_rate": 0.7448,
+     "heard_as": [
+      "AH",
+      "UH",
+      "(dropped)"
+     ]
+    },
+    "G": {
+     "n": 150,
+     "error_rate": 0.2333,
+     "heard_as": [
+      "K",
+      "(dropped)",
+      "T"
+     ]
+    },
+    "AA": {
+     "n": 183,
+     "error_rate": 0.2678,
+     "heard_as": [
+      "AO",
+      "AH",
+      "OW"
+     ]
+    },
+    "B": {
+     "n": 252,
+     "error_rate": 0.0714,
+     "heard_as": [
+      "P",
+      "F",
+      "V"
+     ]
+    },
+    "S": {
+     "n": 613,
+     "error_rate": 0.1533,
+     "heard_as": [
+      "(dropped)",
+      "Z",
+      "SH"
+     ]
+    },
+    "OW": {
+     "n": 249,
+     "error_rate": 0.1486,
+     "heard_as": [
+      "AO",
+      "AW",
+      "AA"
+     ]
+    },
+    "P": {
+     "n": 321,
+     "error_rate": 0.2866,
+     "heard_as": [
+      "B",
+      "(dropped)",
+      "F"
+     ]
+    },
+    "Y": {
+     "n": 120,
+     "error_rate": 0.075,
+     "heard_as": [
+      "(dropped)",
+      "IY",
+      "IH"
+     ]
+    },
+    "EY": {
+     "n": 273,
+     "error_rate": 0.1612,
+     "heard_as": [
+      "EH",
+      "AE",
+      "AY"
+     ]
+    },
+    "JH": {
+     "n": 93,
+     "error_rate": 0.6882,
+     "heard_as": [
+      "CH",
+      "ZH",
+      "SH"
+     ]
+    },
+    "AW": {
+     "n": 119,
+     "error_rate": 0.084,
+     "heard_as": [
+      "OW",
+      "AY",
+      "AO"
+     ]
+    },
+    "CH": {
+     "n": 109,
+     "error_rate": 0.1651,
+     "heard_as": [
+      "SH",
+      "(dropped)",
+      "T"
+     ]
+    }
+   }
+  }
+ }
+}

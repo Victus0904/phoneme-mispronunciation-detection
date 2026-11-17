@@ -170,3 +170,14 @@ with `--l2arctic` inherits L2-ARCTIC's non-commercial license.
 (CPU, 2 cores / 4 GiB, scales to zero 5 minutes after the last request,
 about $0.13 per running hour, at most 2 containers). The first request
 after an idle spell takes about 30 s while the model loads.
+
+The deployed site uses `ft_l2`: `scripts/modal_web.py` mounts the `pmd-ft`
+volume read-only for the model and uploads the matching heads from
+`runs/ft_l2/` (head, fluency heads, strictness thresholds and
+`pairs_calibration.json`, refit for this model with
+`scripts/synth_pairs.ps1` + `scripts/check_pairs.py` +
+`scripts/fit_pairs_calibration.py`: 79.7% correct / 12.9% unsure / 7.4% wrong
+on synthetic voices, vs 82.0 / 12.0 / 6.0 for the frozen model). Accounts
+live in the Modal Dict `pmd-accounts`; the session key is the Modal Secret
+`pmd-session`. `WEB_MODEL=frozen modal deploy scripts/modal_web.py` rolls
+back to the frozen model.

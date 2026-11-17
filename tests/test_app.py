@@ -112,7 +112,8 @@ class AppTest(unittest.TestCase):
 
     # ------------------------------------------------------------ pairs + coach
     def test_pairs_are_calibrated(self):
-        with open(os.path.join(ROOT, "models", "pairs_calibration.json")) as f:
+        from src.scorer import PAIRS_FILE  # the active model's calibration (MODELS_DIR), else models/
+        with open(PAIRS_FILE) as f:
             bias = json.load(f)["bias_ab"]
         for s in PAIR_SETS:
             self.assertIn(s["id"], bias)

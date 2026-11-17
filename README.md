@@ -83,6 +83,19 @@ What else is in the app:
   Settings). The default flags only sounds it's fairly sure about; stricter
   levels catch more real errors at the cost of more false alarms (table
   below).
+- **Accounts and first-language tuning.** Sign up (or continue as a
+  guest), then pick your first language. The app ranks the sounds to focus
+  on, recommends lessons and minimal pairs, suggests sentences and adds a
+  short note to flagged sounds. For Arabic, Mandarin, Hindi, Korean, Spanish
+  and Vietnamese the focus sounds come from what speakers of that language
+  were actually marked wrong on in L2-ARCTIC (`models/l1_stats.json`);
+  German, French, Japanese, Portuguese and Russian use commonly described
+  patterns and are labelled as such. Accounts store only email, name, a
+  scrypt password hash and the language (`src/accounts.py`).
+- **Multi-accent model (optional).** `docs/FINETUNING.md` fine-tunes the
+  acoustic model on speechocean762 + L2-ARCTIC: test r 0.753 → 0.798, and
+  much better on held-out speakers of six other first languages. The hosted
+  Modal site uses it; it is non-commercial (CC BY-NC 4.0, from L2-ARCTIC).
 - **Lessons, progress tracking** (streaks, per-sound trend lines), A/B
   playback, and settings for voice, speed and feedback style.
 - **Installable** as a web app, or as an Android app: download the APK from

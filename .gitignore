@@ -17,3 +17,6 @@ android/build/
 *.jks
 *.keystore
 *.password
+
+# local accounts store and session key (src/accounts.py)
+data/
