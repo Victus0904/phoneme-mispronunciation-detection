@@ -124,6 +124,15 @@ What else is in the app:
   acoustic model on speechocean762 + L2-ARCTIC: test r 0.753 → 0.798, and
   much better on held-out speakers of six other first languages. The hosted
   Modal site uses it; it is non-commercial (CC BY-NC 4.0, from L2-ARCTIC).
+- **Maya has a face.** An illustrated coach who blinks, follows your
+  pointer, tilts her head to listen while you record (her halo pulses with
+  your voice), looks thoughtful while scoring, lip-syncs while speaking and
+  beams at a great score.
+- **Momentum and rewards.** XP and levels ("Warm-up" to "Legend"), a daily
+  goal ring, a streak flame with a 7-day strip, reward chips for personal
+  bests, flawless takes, streaks and goals, plus confetti, chimes and a
+  level-up card (switch off in Settings; respects reduced motion). XP is
+  derived from your saved history, so it syncs with your account.
 - **Lessons, progress tracking** (streaks, per-sound trend lines), A/B
   playback, and settings for voice, speed and feedback style.
 - **Installable** as a web app, or as an Android app: download the APK from
