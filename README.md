@@ -5,7 +5,10 @@ Read a sentence aloud and get a score for every sound you made, the sounds
 worth another take, what the model heard instead, and a tip for fixing each
 one.
 
-![Pronunciation Coach scoring "Andy loves Canberra"](docs/app_screenshot.png)
+**Try it live:** https://notjustaroaster--pronunciation-coach-web.us-east.modal.run
+(the first visit after a quiet spell takes about 30 s while the server wakes up).
+
+![Pronunciation Coach: Maya giving feedback on "Andy loves Canberra", with the daily goal, streak and level on the left and the focus sound on the right](docs/app_screenshot.png)
 
 - **Small, honest training footprint.** The default build uses
   `facebook/wav2vec2-lv-60-espeak-cv-ft` frozen and trains only a small
